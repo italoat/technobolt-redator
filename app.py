@@ -13,23 +13,23 @@ st.set_page_config(
 # --- 2. CSS PARA DARK MODE TOTAL, FONTES BRANCAS E UI EXECUTIVA ---
 st.markdown("""
 <style>
-    /* OCULTA ELEMENTOS PADRÃO DO STREAMLIT QUE POLUEM O DESIGN */
+    /* OCULTA ELEMENTOS PADRÃO DO STREAMLIT */
     [data-testid="stSidebar"] { display: none !important; }
     header { visibility: hidden !important; }
     footer { visibility: hidden !important; }
 
-    /* FUNDO ESCURO PROFUNDO (ESTILO GITHUB DARK / VESTA) */
+    /* FUNDO ESCURO PROFUNDO (ESTILO GITHUB DARK) */
     .stApp { 
         background-color: #0d1117 !important; 
         color: #ffffff !important; 
     }
 
-    /* FORÇA TODAS AS FONTES, LABELS E TEXTOS PARA BRANCO PURO */
+    /* FORÇA TODAS AS FONTES PARA BRANCO PURO */
     h1, h2, h3, h4, h5, h6, p, label, span, div, .stMarkdown, [data-testid="stWidgetLabel"] p { 
         color: #ffffff !important; 
     }
 
-    /* TÍTULO PRINCIPAL CENTRALIZADO */
+    /* TÍTULO PRINCIPAL */
     .main-title { 
         font-size: 36px; 
         font-weight: 800; 
@@ -39,7 +39,7 @@ st.markdown("""
         letter-spacing: -1px;
     }
 
-    /* CABEÇALHO DAS FERRAMENTAS (GRADIENTE DARK SUTIL) */
+    /* CABEÇALHO DAS FERRAMENTAS */
     .product-header { 
         background: linear-gradient(90deg, #161b22, #0d1117); 
         color: #ffffff !important; 
@@ -50,7 +50,7 @@ st.markdown("""
         border: 1px solid #30363d;
     }
 
-    /* ESTILIZAÇÃO DO MENU SUPERIOR (SELECTBOX) PARA DARK MODE */
+    /* MENU SUPERIOR (SELECTBOX) DARK MODE */
     div[data-baseweb="select"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
@@ -62,17 +62,12 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* ESTILO PARA INPUTS E TEXTAREAS */
+    /* INPUTS E TEXTAREAS */
     .stTextInput input, .stTextArea textarea {
         background-color: #0d1117 !important;
         color: #ffffff !important;
         border: 1px solid #30363d !important;
         border-radius: 8px !important;
-    }
-
-    /* ESTILO PARA O SLIDER DE FORMALIDADE */
-    .stSlider [data-testid="stTickBarMin"], .stSlider [data-testid="stTickBarMax"], .stSlider span {
-        color: #ffffff !important;
     }
 
     /* BOTÃO GERAR (VERDE CORPORATIVO) */
@@ -92,9 +87,13 @@ st.markdown("""
         transform: translateY(-2px);
     }
     
-    /* TAGS DO MULTISELECT */
+    /* TAGS E TABS */
     span[data-baseweb="tag"] {
         background-color: #388bfd !important;
+        color: #ffffff !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
         color: #ffffff !important;
     }
 
@@ -109,13 +108,14 @@ api_key = os.environ.get("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
 
-# --- 4. SISTEMA DE NAVEGAÇÃO SUPERIOR (DENTRO DA PÁGINA) ---
-st.markdown('<div style="text-align: center; font-weight: bold; color: #58a6ff; margin-top: 15px; font-size: 13px; letter-spacing: 1px;">CENTRAL DE COMANDO</div>', unsafe_allow_html=True)
+# --- 4. SISTEMA DE NAVEGAÇÃO SUPERIOR ---
+st.markdown('<div style="text-align: center; font-weight: bold; color: #58a6ff; margin-top: 15px; font-size: 13px;">CENTRAL DE COMANDO</div>', unsafe_allow_html=True)
 menu_opcoes = [
     "🏠 Página Inicial", 
     "✉️ Gerador de Email Inteligente", 
     "🧠 Gerador de Briefing Negocial", 
-    "📝 Analista de Atas de Governança"
+    "📝 Analista de Atas de Governança",
+    "📈 Inteligência Competitiva"
 ]
 menu_selecionado = st.selectbox("Menu", menu_opcoes, label_visibility="collapsed")
 
@@ -123,106 +123,92 @@ st.markdown("<hr>", unsafe_allow_html=True)
 
 # --- 5. MEMÓRIA DE SESSÃO (TAGS) ---
 if 'tags_disponiveis' not in st.session_state:
-    st.session_state.tags_disponiveis = ["Novas Leis", "Concorrência", "Tecnologia", "Macroeconomia", "Mercado Financeiro"]
+    st.session_state.tags_disponiveis = ["Novas Leis", "Concorrência", "Tecnologia", "Mercado Financeiro", "Churn"]
 
 # --- 6. TELAS DO HUB ---
 
-# --- TELA: HOME ---
+# --- HOME ---
 if "🏠 Página Inicial" in menu_selecionado:
     st.markdown('<div class="main-title">TechnoBolt IA ⚡</div>', unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color: #8b949e !important;'>Hub estratégico de produtividade corporativa em ambiente Dark Mode.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color: #8b949e !important;'>Hub estratégico de produtividade e inteligência para alta gestão.</p>", unsafe_allow_html=True)
     
     st.markdown("""
-    ### 🚀 Soluções de Elite
-    Selecione a ferramenta no menu superior para começar:
-    
-    * **✉️ Gerador de Email:** Redação executiva com ajuste fino de cargo e formalidade.
-    * **🧠 Briefing Negocial:** Radar estratégico em tempo real baseado em suas palavras-chave.
-    * **📝 Analista de Atas:** Transformação de decisões verbais em documentos formais de governança.
-    
-    ---
-    *Otimizado para desktops e dispositivos móveis (iOS/Android).*
+    ### 🚀 Soluções Corporativas Disponíveis:
+    * **✉️ Gerador de Email:** Redação executiva com ajuste de cargo e formalidade.
+    * **🧠 Briefing Negocial:** Radar estratégico em tempo real via tags livres.
+    * **📝 Analista de Atas:** Formalização instantânea de decisões de diretoria.
+    * **📈 Inteligência Competitiva:** Análise de rivais e monitoramento de saúde de clientes.
     """)
 
-# --- TELA: GERADOR DE EMAIL ---
+# --- GERADOR DE EMAIL ---
 elif "✉️ Gerador de Email" in menu_selecionado:
     st.markdown('<div class="product-header">✉️ Gerador de Email Inteligente</div>', unsafe_allow_html=True)
+    cargo = st.text_input("Cargo que a IA deve assumir:", placeholder="Ex: Diretor de Vendas")
+    dest = st.text_input("Destinatário:", placeholder="Ex: CEO da Empresa Alpha")
+    obj = st.text_area("Objetivo da comunicação:", placeholder="Ex: Solicitar renegociação de prazos...")
+    formalidade = st.select_slider("Grau de Formalidade:", ["Casual", "Cordial", "Executivo", "Rígido"], value="Executivo")
     
-    cargo = st.text_input("Qual cargo a IA deve assumir?", placeholder="Ex: Diretor de Operações")
-    dest = st.text_input("Para quem você está escrevendo?", placeholder="Ex: CEO da Empresa X")
-    obj = st.text_area("Objetivo da comunicação:", placeholder="Ex: Solicitar urgência no faturamento da nota...")
-    
-    # REINTEGRAÇÃO DA BARRA DE FORMALIDADE
-    formalidade = st.select_slider(
-        "Nível de Formalidade do Texto:",
-        options=["Muito Casual", "Cordial/Amigável", "Executivo/Padrão", "Formal/Rígido", "Urgente/Direto"],
-        value="Executivo/Padrão"
-    )
-    
-    if st.button("🚀 GERAR COMUNICAÇÃO EXECUTIVA"):
-        if not cargo or not obj:
-            st.warning("Por favor, preencha o cargo e o objetivo para continuar.")
-        else:
-            with st.spinner("IA redigindo conteúdo profissional..."):
-                try:
-                    model = genai.GenerativeModel("models/gemini-3-flash-preview")
-                    prompt = f"""
-                    Atue como um {cargo} altamente profissional. 
-                    Escreva um e-mail para {dest}. 
-                    Objetivo: {obj}. 
-                    Tom: {formalidade}.
-                    Importante: Use fontes brancas na resposta final.
-                    """
-                    response = model.generate_content(prompt)
-                    st.text_area("Cópia disponível:", response.text, height=450)
-                except Exception as e:
-                    st.error(f"Erro na geração: {e}")
+    if st.button("🚀 GERAR E-MAIL PROFISSIONAL"):
+        with st.spinner("IA redigindo..."):
+            try:
+                model = genai.GenerativeModel("models/gemini-3-flash-preview")
+                prompt = f"Como {cargo}, escreva para {dest} sobre {obj}. Tom: {formalidade}."
+                response = model.generate_content(prompt)
+                st.text_area("Resultado:", response.text, height=400)
+            except Exception as e: st.error(f"Erro: {e}")
 
-# --- TELA: BRIEFING NEGOCIAL ---
+# --- BRIEFING NEGOCIAL ---
 elif "🧠 Gerador de Briefing" in menu_selecionado:
     st.markdown('<div class="product-header">🧠 Gerador de Briefing Negocial</div>', unsafe_allow_html=True)
-    
     empresa = st.text_input("Nome da sua Empresa:")
     setor = st.text_input("Setor de Atuação:")
-    tags_radar = st.multiselect("Prioridades do Radar:", options=st.session_state.tags_disponiveis, default=["Novas Leis"])
-    
-    nova_t = st.text_input("➕ Adicionar Tag Personalizada:")
-    if nova_t and nova_t not in st.session_state.tags_disponiveis:
-        st.session_state.tags_disponiveis.append(nova_t)
-        st.rerun()
+    tags_sel = st.multiselect("Radar de Prioridades:", options=st.session_state.tags_disponiveis, default=["Novas Leis"])
+    if st.button("⚡ ESCANEAR MERCADO"):
+        with st.spinner("IA processando radar 2025..."):
+            try:
+                model = genai.GenerativeModel("models/gemini-3-flash-preview")
+                prompt_b = f"Gere briefing executivo para {empresa} ({setor}). Foco: {', '.join(tags_sel)}."
+                response = model.generate_content(prompt_b)
+                st.markdown(response.text)
+            except Exception as e: st.error(f"Erro: {e}")
 
-    if st.button("⚡ ESCANEAR MERCADO E TAGS"):
-        if not empresa or not setor:
-            st.warning("Informe os dados da empresa para o radar.")
-        else:
-            with st.spinner("Analisando notícias e impactos de 2025..."):
-                try:
-                    model = genai.GenerativeModel("models/gemini-3-flash-preview")
-                    p_briefing = f"Gere briefing executivo para {empresa} ({setor}). Foco: {', '.join(tags_radar)}."
-                    response = model.generate_content(p_briefing)
-                    st.markdown(response.text)
-                except Exception as e:
-                    st.error(f"Erro: {e}")
-
-# --- TELA: ANALISTA DE ATAS ---
+# --- ANALISTA DE ATAS ---
 elif "📝 Analista de Atas" in menu_selecionado:
     st.markdown('<div class="product-header">📝 Analista de Atas de Governança</div>', unsafe_allow_html=True)
+    notas = st.text_area("Decisões e tópicos da reunião:", height=250)
+    if st.button("📝 FORMALIZAR DOCUMENTO"):
+        with st.spinner("Estruturando documento oficial..."):
+            try:
+                model = genai.GenerativeModel("models/gemini-3-flash-preview")
+                response = model.generate_content(f"Transforme em ata de diretoria formal: {notas}")
+                st.markdown(response.text)
+            except Exception as e: st.error(f"Erro: {e}")
+
+# --- INTELIGÊNCIA COMPETITIVA ---
+elif "📈 Inteligência Competitiva" in menu_selecionado:
+    st.markdown('<div class="product-header">📈 Inteligência Competitiva e Sentimento</div>', unsafe_allow_html=True)
+    aba1, aba2 = st.tabs(["🔍 Radar de Concorrência", "❤️ Sentimento do Cliente"])
     
-    notas = st.text_area("Decisões e tópicos da reunião:", height=250, placeholder="Ex: Diretor Financeiro aprovou budget extra para marketing...")
-    
-    if st.button("📝 GERAR DOCUMENTO FORMAL"):
-        if not notas:
-            st.warning("Insira as notas da reunião para formalizar.")
-        else:
-            with st.spinner("IA estruturando ata oficial..."):
+    with aba1:
+        concorrente = st.text_input("Empresa Rival:", placeholder="Nome do concorrente")
+        if st.button("📡 ANALISAR RIVAL"):
+            with st.spinner("Escaneando mercado..."):
                 try:
                     model = genai.GenerativeModel("models/gemini-3-flash-preview")
-                    response = model.generate_content(f"Transforme em uma ata de diretoria formal e estruturada: {notas}")
-                    st.markdown(response.text)
-                    st.download_button("📥 Baixar em Markdown", response.text, file_name="ata_governanca.md")
-                except Exception as e:
-                    st.error(f"Erro: {e}")
+                    res = model.generate_content(f"Analise a estratégia atual da {concorrente} e aponte brechas comerciais.")
+                    st.markdown(res.text)
+                except Exception as e: st.error(e)
+                
+    with aba2:
+        feedback = st.text_area("Feedback do Cliente:", placeholder="Cole o texto aqui para análise de risco de perda (Churn)")
+        if st.button("🧠 PREVER RISCO"):
+            with st.spinner("Analisando entrelinhas..."):
+                try:
+                    model = genai.GenerativeModel("models/gemini-3-flash-preview")
+                    res = model.generate_content(f"Analise o risco de cancelamento baseado neste feedback: {feedback}")
+                    st.markdown(res.text)
+                except Exception as e: st.error(e)
 
 # --- RODAPÉ ---
 st.markdown("<hr>", unsafe_allow_html=True)
-st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Full Dark v2.5 stable")
+st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Corporativo v2.6 stable")
