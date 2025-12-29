@@ -18,12 +18,27 @@ st.markdown("""
     .stApp { background-color: #ffffff; color: #1e1e1e; }
     .main-title { font-size: 42px; font-weight: 800; color: #0D1B2A; margin-bottom: 10px; }
     .sub-title { font-size: 18px; color: #415A77; margin-bottom: 30px; }
-    .product-header { background: linear-gradient(90deg, #0077b6, #00b4d8); color: white; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
+    .product-header { 
+        background: linear-gradient(90deg, #0077b6, #00b4d8); 
+        color: white; 
+        padding: 20px; 
+        border-radius: 10px; 
+        margin-bottom: 25px; 
+    }
+    .stButton > button { 
+        width: 100%; 
+        border-radius: 8px; 
+        height: 3.5em; 
+        font-weight: bold; 
+        background-color: #0077b6;
+        color: white;
+    }
+    .stTextArea textarea { border-radius: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- 3. CONFIGURAÇÃO DA API ---
-# Se a chave vazou, gere uma nova e use no terminal ou cole abaixo para teste privado
+# O sistema busca a chave nas variáveis de ambiente por segurança
 api_key = os.environ.get("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
@@ -33,33 +48,38 @@ with st.sidebar:
     st.title("⚡ TechnoBolt IA")
     st.markdown("---")
     
-    st.subheader("🛠️ Ferramentas")
+    st.subheader("Escolha a Ferramenta")
     menu = st.radio(
-        "Escolha o que deseja fazer:",
-        ["Página Inicial", "Gerador de Email Inteligente", "Gerador de Briefing Negocial"]
+        "Navegação:",
+        ["Página Inicial", "Gerador de Email Inteligente", "Gerador de Briefing Negocial"],
+        label_visibility="collapsed"
     )
     
     st.markdown("---")
     if not api_key:
-        st.warning("⚠️ Chave API não detectada.")
-    st.caption("v1.1.0 - Inteligência Conectada")
+        st.error("⚠️ API Key não configurada no sistema.")
+    st.caption(f"Versão 1.3.0 | Dezembro 2025")
+    st.caption("Tecnologia de IA Generativa")
 
 # --- 5. LÓGICA DAS PÁGINAS ---
 
-# --- TELA HOME ---
+# --- TELA: PÁGINA INICIAL ---
 if menu == "Página Inicial":
     st.markdown('<div class="main-title">TechnoBolt IA ⚡</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">Sua central de produtividade movida por modelos de IA de última geração.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">Seu Hub Corporativo de Inteligência Artificial.</div>', unsafe_allow_html=True)
     
     st.markdown("""
-    ### 🚀 Bem-vindo ao Futuro do Trabalho
-    Nossas ferramentas utilizam **Inteligência Artificial Generativa** para automatizar tarefas complexas.
+    ### 🚀 Transformação Digital com IA
+    O **TechnoBolt IA** centraliza ferramentas avançadas para otimizar a rotina de gestores e executivos. 
+    Toda a nossa tecnologia é baseada em modelos de linguagem de última geração.
+
+    **Explore nossas soluções:**
     
     * **✉️ Gerador de Email Inteligente:** Redija comunicações impecáveis escolhendo o cargo do remetente e o objetivo.
-    * **🧠 Gerador de Briefing Negocial:** Receba um raio-x estratégico do mercado e radar de notícias atualizadas.
+    * **🧠 Gerador de Briefing Negocial:** Receba um raio-x estratégico do mercado com radar de notícias via tags personalizadas.
     
     ---
-    *Selecione uma ferramenta ao lado para começar.*
+    *Selecione uma ferramenta no menu ao lado para começar.*
     """)
 
 # --- TELA: GERADOR DE EMAIL INTELIGENTE ---
@@ -69,39 +89,39 @@ elif menu == "Gerador de Email Inteligente":
     col1, col2 = st.columns([1, 1.2])
     
     with col1:
-        cargo_ia = st.text_input("Qual cargo a IA deve assumir?", placeholder="Ex: Diretor Comercial, Analista de RH...")
-        destinatario = st.text_input("Para quem você está escrevendo?", placeholder="Ex: CEO da Empresa X, Novo Cliente...")
-        objetivo = st.text_area("O que você deseja com esse e-mail? (Objetivo)", placeholder="Ex: Agendar uma demonstração do software, Pedir feedback sobre a proposta...")
+        cargo_ia = st.text_input("Qual cargo a IA deve assumir?", placeholder="Ex: Diretor de Vendas, Analista Jurídico...")
+        destinatario = st.text_input("Para quem você está escrevendo?", placeholder="Ex: CEO da Empresa Alpha, Novo Parceiro...")
+        objetivo = st.text_area("Qual o objetivo do e-mail?", placeholder="Ex: Agendar reunião de alinhamento, Solicitar urgência no contrato...")
         tom = st.select_slider("Nível de Formalidade:", options=["Muito Casual", "Cordial/Amigável", "Executivo/Sério", "Urgente/Direto"])
     
     with col2:
-        st.markdown("### ✨ Resultado da IA")
-        if st.button("🚀 CRIAR E-MAIL PROFISSIONAL"):
+        st.markdown("### ✨ E-mail Gerado")
+        if st.button("🚀 REDIGIR E-MAIL COM IA"):
             if not api_key:
-                st.error("Configure sua API Key para continuar.")
+                st.error("Chave API ausente.")
             elif not cargo_ia or not objetivo:
-                st.warning("Preencha o cargo e o objetivo para gerar um bom e-mail.")
+                st.warning("Preencha o cargo e o objetivo.")
             else:
-                with st.spinner("A IA está redigindo seu e-mail..."):
+                with st.spinner("IA processando sua comunicação..."):
                     try:
-                        # Usando o motor Gemini 3 que é o topo de linha em 2025
+                        # Usando o motor Gemini 3 Flash da sua lista confirmada
                         model = genai.GenerativeModel("models/gemini-3-flash-preview")
                         
                         prompt_email = f"""
-                        Atue como um {cargo_ia} altamente experiente.
+                        Atue como um {cargo_ia} profissional.
                         Escreva um e-mail para {destinatario}.
-                        Objetivo do e-mail: {objetivo}.
-                        Nível de formalidade e tom: {tom}.
+                        Objetivo central: {objetivo}.
+                        Tom de voz: {tom}.
 
-                        Regras:
-                        - Crie um Assunto chamativo e profissional.
-                        - No corpo, use uma linguagem fluida e persuasiva.
-                        - Use parágrafos bem espaçados.
+                        Regras de Formatação:
+                        - Crie um Assunto profissional.
+                        - Use parágrafos claros.
+                        - Linguagem persuasiva e correta.
                         """
                         
                         response = model.generate_content(prompt_email)
-                        st.write(response.text)
-                        st.download_button("📥 Copiar Texto", response.text)
+                        st.text_area("Resultado (pronto para copiar):", response.text, height=450)
+                        st.success("E-mail gerado com sucesso!")
                     except Exception as e:
                         st.error(f"Erro na geração: {e}")
 
@@ -112,35 +132,56 @@ elif menu == "Gerador de Briefing Negocial":
     col1, col2 = st.columns([1, 1.5])
     
     with col1:
-        empresa = st.text_input("Nome da sua Empresa:", placeholder="Ex: TechnoBolt Tech")
-        setor = st.text_input("Setor de Atuação:", placeholder="Ex: Tecnologia e SaaS")
-        foco = st.multiselect("Focar radar em:", ["Leis", "Concorrência", "Tecnologia", "Economia"], default=["Tecnologia"])
-    
+        empresa = st.text_input("Sua Organização:", placeholder="Ex: TechnoBolt Tech")
+        setor = st.text_input("Setor de Atuação:", placeholder="Ex: Varejo, Logística, Saúde...")
+        
+        # SISTEMA DE TAGS DINÂMICAS: O usuário pode selecionar ou digitar novas
+        tags_radar = st.multiselect(
+            "Prioridades do Radar (Tags):",
+            options=["Novas Leis", "Concorrência", "Inovação", "Macroeconomia", "Dólar", "Tributação"],
+            default=["Novas Leis", "Concorrência"],
+            help="Escolha as sugestões ou digite sua própria palavra-chave e dê Enter."
+        )
+        st.caption("💡 Digite temas específicos e pressione Enter para criar novas tags.")
+
     with col2:
-        st.markdown("### 📊 Relatório & Radar de Notícias")
-        if st.button("⚡ ESCANEAR MERCADO"):
+        st.markdown("### 📊 Relatório Estratégico & Notícias")
+        if st.button("⚡ ESCANEAR MERCADO E GERAR INSIGHTS"):
             if not api_key:
-                st.error("API Key não configurada.")
+                st.error("Chave API ausente.")
             elif not empresa or not setor:
-                st.warning("Preencha os dados da empresa.")
+                st.warning("Por favor, preencha os dados da empresa e setor.")
             else:
-                with st.spinner("Analisando notícias e mercado em tempo real..."):
+                with st.spinner("IA escaneando notícias recentes e analisando mercado..."):
                     try:
                         model = genai.GenerativeModel("models/gemini-3-flash-preview")
+                        temas_str = ", ".join(tags_radar)
+                        
                         prompt_briefing = f"""
-                        Atue como CSO (Chief Strategy Officer).
-                        Gere um briefing para {empresa} no setor de {setor}.
-                        Data atual: {time.strftime('%d/%m/%Y')}.
+                        Atue como Chief Strategy Officer (CSO). 
+                        Data: {time.strftime('%d/%m/%Y')}.
+                        Gere um briefing para {empresa} (Setor: {setor}).
+                        Foco exclusivo nas Tags de Radar: {temas_str}.
 
                         ESTRUTURA:
-                        1. RADAR DE NOTÍCIAS (Últimas 24-48h impactando {setor} no Brasil).
-                        2. ANÁLISE DE IMPACTO EM {', '.join(foco)}.
-                        3. RECOMENDAÇÃO DE GESTÃO (O que o CEO deve fazer agora).
+                        1. 🚩 RADAR DE NOTÍCIAS (Resumo de notícias reais e recentes sobre as tags).
+                        2. 📉 IMPACTO NO NEGÓCIO (Como esses fatos afetam especificamente a {empresa}).
+                        3. 💡 RECOMENDAÇÃO DE GESTÃO (Qual a ação imediata para a diretoria?).
+                        
+                        Responda de forma sóbria e executiva em Português.
                         """
+                        
                         response = model.generate_content(prompt_briefing)
                         st.markdown(response.text)
+                        
+                        st.download_button(
+                            label="📥 Baixar Briefing Executivo",
+                            data=response.text,
+                            file_name=f"Briefing_{empresa}_{time.strftime('%d%m')}.md",
+                            mime="text/markdown"
+                        )
                     except Exception as e:
-                        st.error(f"Erro: {e}")
+                        st.error(f"Erro na análise: {e}")
 
 # --- 6. RODAPÉ ---
 st.markdown("---")
