@@ -104,7 +104,7 @@ st.markdown("""
 # --- BARRA LATERAL ---
 with st.sidebar:
     st.title("⚡ TechnoBolt")
-    st.caption("Intelligence System v1.0")
+    st.caption("Intelligence System v1.1 - Dark")
     st.markdown("---")
     
     # Status da Conexão
