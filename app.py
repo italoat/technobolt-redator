@@ -3,19 +3,43 @@ import google.generativeai as genai
 import json
 import os
 
-# --- CONFIGURAÇÃO DA PÁGINA (Deve ser o primeiro comando) ---
+# --- 1. CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
     page_title="TechnoBolt - AI Suite",
     page_icon="⚡",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- 🔒 SEGURANÇA: CONFIGURAÇÃO DA API KEY ---
-# O código busca a chave nas configurações do servidor (Render)
-# Se estiver rodando local e tiver a chave no ambiente, ele pega.
+# --- 2. CSS: APENAS REMOVE BARRA SUPERIOR (MANTÉM TEMA CLARO PADRÃO) ---
+hide_header_style = """
+<style>
+    /* Remove o cabeçalho (menu hambúrguer e barra colorida) */
+    header {visibility: hidden;}
+    
+    /* Remove o rodapé padrão */
+    footer {visibility: hidden;}
+    
+    /* Ajusta o padding para o conteúdo subir */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    
+    /* (Opcional) Força fundo branco caso o navegador force escuro */
+    .stApp {
+        background-color: #ffffff;
+        color: #262730;
+    }
+</style>
+"""
+st.markdown(hide_header_style, unsafe_allow_html=True)
+
+# --- 3. LÓGICA DE DADOS E API ---
+
+# Busca a chave nas variáveis de ambiente
 api_key = os.environ.get("GEMINI_API_KEY")
 
-# --- ARQUIVO DE CONFIGURAÇÃO (PERSISTÊNCIA) ---
 CONFIG_FILE = "perfil_empresa.json"
 
 def carregar_perfil():
@@ -25,7 +49,7 @@ def carregar_perfil():
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
         except:
-            pass # Se der erro ao ler, retorna o padrão
+            pass
     return {
         "nome_empresa": "",
         "setor": "",
@@ -40,71 +64,14 @@ def salvar_perfil(dados):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(dados, f, ensure_ascii=False, indent=4)
 
-# --- INICIALIZAÇÃO DA SESSÃO ---
+# Inicialização da Sessão
 if "perfil" not in st.session_state:
     st.session_state.perfil = carregar_perfil()
 
-# --- 🎨 ESTILIZAÇÃO CSS (DARK MODE ENTERPRISE) ---
-st.markdown("""
-<style>
-    /* Fundo Preto Absoluto */
-    .stApp {
-        background-color: #000000;
-    }
-    
-    /* Barra Lateral */
-    section[data-testid="stSidebar"] {
-        background-color: #111111;
-        border-right: 1px solid #333;
-    }
-    
-    /* Textos Brancos */
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, div[data-testid="stCaptionContainer"] {
-        color: #FFFFFF !important;
-    }
-    
-    /* Inputs Escuros */
-    .stTextInput > div > div > input, 
-    .stTextArea > div > div > textarea,
-    .stSelectbox > div > div > div {
-        color: #ffffff;
-        background-color: #222222;
-        border: 1px solid #444;
-    }
-    
-    /* Botões */
-    .stButton > button {
-        width: 100%;
-        border: 1px solid #ffffff;
-        color: #ffffff;
-        background-color: #000000;
-        font-weight: bold;
-        transition: all 0.3s;
-    }
-    .stButton > button:hover {
-        background-color: #333333;
-        border-color: #00ff00; /* Verde Neon */
-        color: #00ff00;
-    }
-    
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        color: #888888;
-    }
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        color: #FFFFFF;
-        border-bottom-color: #00ff00;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# --- BARRA LATERAL ---
+# --- 4. BARRA LATERAL ---
 with st.sidebar:
     st.title("⚡ TechnoBolt")
-    st.caption("Intelligence System v1.1 - Dark")
+    st.caption("Intelligence System v1.2")
     st.markdown("---")
     
     # Status da Conexão
@@ -112,18 +79,19 @@ with st.sidebar:
         st.success("✅ Servidor Conectado")
     else:
         st.error("❌ API Key Ausente")
-        st.info("Configure a variável GEMINI_API_KEY no Render.")
+        st.info("Configure a variável GEMINI_API_KEY no seu ambiente (ou no Render).")
 
-# --- TÍTULO PRINCIPAL ---
+# --- 5. TÍTULO PRINCIPAL ---
 st.title("🚀 Suite de Comunicação Corporativa")
 st.markdown("---")
 
-# --- ABAS ---
+# --- 6. ABAS ---
 tab1, tab2 = st.tabs(["🏭 DNA da Empresa", "✍️ Gerador de Conteúdo"])
 
 # --- ABA 1: PERFIL ---
 with tab1:
     st.header("Configuração Estratégica")
+    st.info("Preencha os dados abaixo para treinar a IA com a identidade da sua empresa.")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -134,9 +102,9 @@ with tab1:
     with col2:
         tom_voz = st.text_area("Tom de Voz", value=st.session_state.perfil["tom_voz"], height=100, placeholder="Ex: Profissional, direto, acolhedor...")
         proibicoes = st.text_input("Termos Proibidos", value=st.session_state.perfil["proibicoes"])
-        exemplo_estilo = st.text_area("Exemplo de Email ja enviado(Se tiver):", value=st.session_state.perfil["exemplo_estilo"], height=100)
+        exemplo_estilo = st.text_area("Exemplo de Email (Opcional):", value=st.session_state.perfil["exemplo_estilo"], height=100)
 
-    if st.button("💾 Salvar DNA da Marca"):
+    if st.button("💾 Salvar DNA da Marca", type="primary"):
         novos_dados = {
             "nome_empresa": nome_empresa,
             "setor": setor,
@@ -157,7 +125,7 @@ with tab2:
     if not st.session_state.perfil["nome_empresa"]:
         st.warning("⚠️ Configure o perfil na aba anterior antes de começar.")
     else:
-        st.write(f"Cliente Ativo: **{st.session_state.perfil['nome_empresa']}**")
+        st.markdown(f"Cliente Ativo: **{st.session_state.perfil['nome_empresa']}**")
         
         col_input, col_output = st.columns([1, 1])
 
@@ -167,20 +135,22 @@ with tab2:
             
             topico = st.text_area("Instruções / Tópicos", height=250, placeholder="Descreva sobre o que a IA deve escrever...")
             
-            gerar_btn = st.button("⚡ PROCESSAR", type="primary")
+            gerar_btn = st.button("⚡ PROCESSAR TEXTO", type="primary")
 
         with col_output:
             if gerar_btn:
                 if not api_key:
                     st.error("⛔ ERRO CRÍTICO: Chave de API não encontrada.")
-                    st.markdown("No Render, vá em **Environment** e adicione a variável `GEMINI_API_KEY` com sua chave.")
+                    st.markdown("Verifique se a variável `GEMINI_API_KEY` está configurada.")
                 elif not topico:
                     st.warning("⚠️ Digite um tópico para processar.")
                 else:
-                    with st.spinner("Conectando ao Gemini 2.5 Flash..."):
+                    with st.spinner("A IA está escrevendo..."):
                         try:
                             # Configuração da IA
                             genai.configure(api_key=api_key)
+                            
+                            # Modelo atualizado para versão estável (Flash 1.5)
                             model = genai.GenerativeModel('gemini-2.5-flash')
 
                             # Prompt Engenharia
@@ -209,7 +179,7 @@ with tab2:
                             
                             st.success("Processamento Concluído!")
                             st.markdown("### Resultado:")
-                            st.code(response.text, language="markdown")
+                            st.markdown(response.text) # Renderiza o Markdown direto
                             
                         except Exception as e:
                             st.error(f"Erro na geração: {e}")
