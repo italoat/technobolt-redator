@@ -11,16 +11,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. CSS AVANÇADO: CORREÇÃO DE VISIBILIDADE MOBILE E DESIGN ---
+# --- 2. CSS DEFINITIVO PARA VISIBILIDADE MOBILE ---
 st.markdown("""
 <style>
-    /* 1. OCULTA ELEMENTOS PADRÃO DO STREAMLIT */
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
+    /* OCULTA O CABEÇALHO PADRÃO DO STREAMLIT QUE PODE BLOQUEAR O TOQUE */
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
 
-    /* 2. FORÇA A APARIÇÃO DO BOTÃO DA BARRA LATERAL (CÍRCULO AZUL) */
-    /* Este seletor ataca o ID específico do componente de menu do Streamlit */
+    /* FORÇA O BOTÃO DO MENU (SETA) A VIRAR UM CÍRCULO AZUL DESTACADO */
+    /* Este seletor busca o botão de colapso da barra lateral pelo atributo de teste oficial */
     [data-testid="stSidebarCollapseButton"] {
         background-color: #0077b6 !important;
         color: white !important;
@@ -37,16 +36,16 @@ st.markdown("""
         box-shadow: 0px 4px 15px rgba(0,0,0,0.4) !important;
         visibility: visible !important;
     }
-    
-    /* Garante que o ícone da seta dentro do círculo seja branco e visível */
+
+    /* Garante que a seta dentro do círculo seja branca e nítida */
     [data-testid="stSidebarCollapseButton"] svg {
         fill: white !important;
         color: white !important;
-        width: 35px !important;
-        height: 35px !important;
+        width: 32px !important;
+        height: 32px !important;
     }
 
-    /* 3. ESTILO GERAL DA INTERFACE */
+    /* ESTILO GERAL DO HUB */
     .stApp { background-color: #ffffff; color: #1e1e1e; }
     .main-title { font-size: 38px; font-weight: 800; color: #0D1B2A; margin-top: 10px; }
     .product-header { 
@@ -54,17 +53,18 @@ st.markdown("""
         color: white; padding: 25px; border-radius: 12px; margin-bottom: 30px; 
     }
     
-    /* 4. BOTÕES DE AÇÃO */
+    /* BOTÕES EXECUTIVOS */
     .stButton > button { 
         width: 100%; border-radius: 10px; height: 3.8em; 
         font-weight: bold; background-color: #0077b6; color: white; border: none;
+        transition: 0.3s;
     }
     .stButton > button:hover {
         background-color: #00b4d8;
         transform: translateY(-2px);
     }
 
-    /* 5. AVISO PARA MOBILE */
+    /* BANNER DE AJUDA PARA MOBILE */
     @media (max-width: 768px) {
         .mobile-helper {
             background-color: #f0f2f6;
@@ -85,7 +85,7 @@ if api_key:
 
 # --- 4. MEMÓRIA DE SESSÃO (TAGS) ---
 if 'tags_disponiveis' not in st.session_state:
-    st.session_state.tags_disponiveis = ["Novas Leis", "Concorrência", "Inovação", "Macroeconomia"]
+    st.session_state.tags_disponiveis = ["Novas Leis", "Concorrência", "Tecnologia", "Macroeconomia", "Tributação"]
 
 # --- 5. MENU LATERAL (SIDEBAR) ---
 with st.sidebar:
@@ -97,81 +97,84 @@ with st.sidebar:
     )
     st.markdown("---")
     if not api_key:
-        st.error("⚠️ API Key não configurada.")
-    st.caption(f"v1.8.0 | Suíte Corporativa 2025")
+        st.error("⚠️ Chave API não configurada.")
+    st.caption(f"v1.9.0 | Edição Corporativa")
 
 # --- 6. FLUXO DE TELAS ---
 
 # --- TELA: HOME ---
 if menu_selecionado == "Página Inicial":
-    st.markdown('<div class="mobile-helper">⬅️ Toque no círculo azul no topo para abrir o menu.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="mobile-helper">⬅️ Toque no círculo azul acima para abrir o menu de ferramentas.</div>', unsafe_allow_html=True)
     
     st.markdown('<div class="main-title">TechnoBolt IA ⚡</div>', unsafe_allow_html=True)
     st.write("##### Hub estratégico de produtividade corporativa potencializado por IA.")
     
     st.markdown("""
     ---
-    ### 🛠️ Nossas Ferramentas:
+    ### 🛠️ Soluções Disponíveis:
     
-    * **✉️ Gerador de Email Inteligente:** Redação executiva de alto nível.
-    * **🧠 Gerador de Briefing Negocial:** Radar estratégico via tags personalizadas.
-    * **📝 Analista de Atas de Governança:** Formalização instantânea de reuniões.
+    * **✉️ Gerador de Email Inteligente:** Redija comunicações impecáveis baseadas no seu cargo e objetivo.
+    * **🧠 Gerador de Briefing Negocial:** Radar estratégico com notícias reais e análise de impacto via tags.
+    * **📝 Analista de Atas de Governança:** Formalize reuniões de diretoria em documentos profissionais instantaneamente.
     
     ---
-    *Utilize o menu lateral para começar.*
+    *Utilize o menu lateral para alternar entre as ferramentas.*
     """)
 
 # --- TELA: EMAIL ---
 elif menu_selecionado == "Gerador de Email Inteligente":
     st.markdown('<div class="product-header">✉️ Gerador de Email Inteligente</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns([1, 1.2])
-    with col1:
-        cargo = st.text_input("Cargo que a IA deve assumir:")
-        dest = st.text_input("Para quem você escreve?")
-        obj = st.text_area("Objetivo do e-mail:")
-    with col2:
-        if st.button("🚀 GERAR E-MAIL"):
-            with st.spinner("IA processando..."):
+    col_a, col_b = st.columns([1, 1.2])
+    with col_a:
+        cargo = st.text_input("Seu Cargo:", placeholder="Ex: Diretor de Vendas")
+        dest = st.text_input("Destinatário:", placeholder="Ex: Conselho de Administração")
+        obj = st.text_area("Objetivo do E-mail:", placeholder="Ex: Solicitar aprovação de budget...")
+        tom = st.select_slider("Formalidade:", ["Casual", "Cordial", "Executivo", "Urgente"])
+    with col_b:
+        if st.button("🚀 GERAR COM IA"):
+            with st.spinner("Redigindo..."):
                 try:
                     model = genai.GenerativeModel("models/gemini-3-flash-preview")
-                    res = model.generate_content(f"Como {cargo}, escreva para {dest} sobre {obj}.")
-                    st.text_area("Resultado:", res.text, height=400)
+                    prompt = f"Como {cargo}, escreva para {dest} sobre {obj}. Tom: {tom}."
+                    res = model.generate_content(prompt)
+                    st.text_area("Resultado:", res.text, height=450)
                 except Exception as e: st.error(f"Erro: {e}")
 
 # --- TELA: BRIEFING ---
 elif menu_selecionado == "Gerador de Briefing Negocial":
     st.markdown('<div class="product-header">🧠 Gerador de Briefing Negocial</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns([1, 1.5])
-    with col1:
-        emp = st.text_input("Sua Organização:")
+    col_c, col_d = st.columns([1, 1.5])
+    with col_c:
+        emp = st.text_input("Empresa:")
         setor = st.text_input("Setor:")
-        sel_tags = st.multiselect("Tags do Radar:", options=st.session_state.tags_disponiveis, default=["Novas Leis"])
-        nova = st.text_input("➕ Adicionar nova tag:")
+        sel_tags = st.multiselect("Radar de Tags:", options=st.session_state.tags_disponiveis, default=["Novas Leis"])
+        nova = st.text_input("➕ Adicionar nova tag personalizada:")
         if nova and nova not in st.session_state.tags_disponiveis:
             st.session_state.tags_disponiveis.append(nova)
             st.rerun()
-    with col2:
+    with col_d:
         if st.button("⚡ ESCANEAR MERCADO"):
-            with st.spinner("Analisando notícias..."):
+            with st.spinner("IA processando notícias e mercado..."):
                 try:
                     model = genai.GenerativeModel("models/gemini-3-flash-preview")
-                    res = model.generate_content(f"Gere um briefing para {emp} ({setor}) focado em {sel_tags}.")
+                    p_briefing = f"Briefing para {emp} no setor {setor}. Tags: {', '.join(sel_tags)}. Data: {time.strftime('%d/%m/%Y')}."
+                    res = model.generate_content(p_briefing)
                     st.markdown(res.text)
                 except Exception as e: st.error(f"Erro: {e}")
 
 # --- TELA: ATAS ---
 elif menu_selecionado == "Analista de Atas de Governança":
     st.markdown('<div class="product-header">📝 Analista de Atas de Governança</div>', unsafe_allow_html=True)
-    notas = st.text_area("Notas da Reunião:", height=250)
-    if st.button("📝 GERAR ATA FORMAL"):
-        with st.spinner("IA formalizando documento..."):
+    notas = st.text_area("Notas da reunião (tópicos brutos):", height=250)
+    if st.button("📝 FORMALIZAR DOCUMENTO"):
+        with st.spinner("IA formatando ata oficial..."):
             try:
                 model = genai.GenerativeModel("models/gemini-3-flash-preview")
-                res = model.generate_content(f"Transforme em ata formal: {notas}")
+                res = model.generate_content(f"Transforme em ata de diretoria formal: {notas}")
                 st.markdown(res.text)
-                st.download_button("📥 Baixar Documento", res.text, file_name="ata.md")
+                st.download_button("📥 Baixar Ata (.md)", res.text, file_name="ata.md")
             except Exception as e: st.error(f"Erro: {e}")
 
 # --- RODAPÉ ---
 st.markdown("---")
-st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Estabilidade Mobile v1.8")
+st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Estabilidade Mobile v1.9")
