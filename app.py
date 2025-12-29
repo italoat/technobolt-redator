@@ -134,7 +134,7 @@ with tab1:
     with col2:
         tom_voz = st.text_area("Tom de Voz", value=st.session_state.perfil["tom_voz"], height=100, placeholder="Ex: Profissional, direto, acolhedor...")
         proibicoes = st.text_input("Termos Proibidos", value=st.session_state.perfil["proibicoes"])
-        exemplo_estilo = st.text_area("Exemplo de Estilo (Few-Shot)", value=st.session_state.perfil["exemplo_estilo"], height=100)
+        exemplo_estilo = st.text_area("Exemplo de Email ja enviado(Se tiver):", value=st.session_state.perfil["exemplo_estilo"], height=100)
 
     if st.button("💾 Salvar DNA da Marca"):
         novos_dados = {
