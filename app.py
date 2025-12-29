@@ -144,3 +144,11 @@ elif menu == "Analista de Atas de Governança":
                     - Encerramento
                     """
                     response = model.generate_content(prompt_ata)
+                    st.markdown("---")
+                    st.markdown(response.text)
+                    st.download_button("📥 Baixar Ata (.md)", response.text, file_name="ata_reuniao.md")
+                except Exception as e:
+                    st.error(f"Erro: {e}")
+
+st.markdown("---")
+st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')}")
