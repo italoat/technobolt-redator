@@ -103,7 +103,6 @@ st.markdown("""
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
         color: white !important;
         border: none !important;
-        border-radius: 10px !important;
         font-weight: 700 !important;
         padding: 10px 25px !important;
     }
@@ -248,6 +247,41 @@ elif "✉️ Gerador de Email" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>✉️ Gerador de Email</h1></div>', unsafe_allow_html=True)
     cargo_e = st.text_input("Seu Cargo:")
     obj_e = st.text_area("Objetivo da Mensagem:")
+    formalidade = st.select_slider("Formalidade:", ["Casual", "Executivo", "Rígido"], value="Executivo")
+    if st.button("🚀 GERAR COMUNICAÇÃO"):
+        res, mod = call_ai_with_failover(f"Como {cargo_e}, escreva um email sobre {obj_e} em tom {formalidade}.")
+        st.markdown(f'<span class="model-badge">Motor: {mod}</span>', unsafe_allow_html=True)
+        st.text_area("Rascunho:", res, height=400)
+        
+# TELA: BRIEFING NEGOCIAL (RESTAURADA E COMPLETA)
+elif "🧠 Briefing Negocial" in menu_selecionado:
+    st.markdown("### 🧠 Briefing Negocial Estratégico")
+    col1, col2 = st.columns(2)
+    with col1:
+        empresa_alvo = st.text_input("Empresa Alvo:", placeholder="Ex: Petrobras, Google, etc.")
+    with col2:
+        setor_atuacao = st.text_input("Setor:", placeholder="Ex: Energia, Tecnologia...")
+    
+    objetivo = st.text_area("Objetivo da Análise:", placeholder="Ex: Avaliar potencial de fusão ou riscos de mercado para 2026.")
+    
+    if st.button("⚡ ESCANEAR MERCADO"):
+        if empresa_alvo:
+            with st.spinner(f"IA Nexus gerando radar para {empresa_alvo}..."):
+                prompt_b = f"""
+                Gere um briefing estratégico 2026 para a empresa {empresa_alvo} no setor {setor_atuacao}. 
+                Foque em: {objetivo}. 
+                Traga: Cenário Macro, Movimentação de Rivais e 3 Recomendações Críticas.
+                """
+                res, mod = call_ai_with_failover(prompt_b)
+                st.markdown(f'<span class="model-badge">Motor: {mod}</span>', unsafe_allow_html=True)
+                st.markdown(res)
+        else:
+            st.warning("Por favor, informe a empresa alvo.")
+
+# TELA: GERADOR DE EMAIL INDIVIDUAL
+elif "✉️ Gerador de Email" in menu_selecionado:
+    cargo_e = st.text_input("Seu Cargo:")
+    obj_e = st.text_area("Objetivo:")
     formalidade = st.select_slider("Formalidade:", ["Casual", "Executivo", "Rígido"], value="Executivo")
     if st.button("🚀 GERAR COMUNICAÇÃO"):
         res, mod = call_ai_with_failover(f"Como {cargo_e}, escreva um email sobre {obj_e} em tom {formalidade}.")
