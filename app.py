@@ -108,28 +108,36 @@ st.markdown("""
         padding: 10px 25px !important;
     }
 
-    /* 8. BOTÕES EXECUTIVOS (CORREÇÃO DE FAIXA PRETA E SOMBRA) */
-    .stButton > button { 
-        width: 100%; border-radius: 14px; height: 4.5em; font-weight: 700; 
-        background-color: #10b981 !important; /* Verde sólido para evitar bugs de gradiente */
-        color: #ffffff !important; 
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important; 
-        text-shadow: none !important; /* REMOVE SOMBRA INTERNA DO TEXTO */
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-    }
-    
-    .stButton > button:hover, .stButton > button:focus, .stButton > button:active {
-        background-color: #2ea043 !important;
-        color: #ffffff !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
-        transform: translateY(-2px);
-    }
+    /* 8. BOTÕES EXECUTIVOS - OBSIDIAN ANTRACITE EDITION */
+.stButton > button { 
+    width: 100%; 
+    border-radius: 12px; 
+    height: 4em; 
+    font-weight: 700; 
+    background-color: #262c36 !important; /* Cinza Corporativo Moderno */
+    color: #ffffff !important; /* Fonte Branca Pura */
+    border: 1px solid #30363d !important; /* Borda sutil para definição */
+    outline: none !important;
+    box-shadow: none !important; 
+    text-shadow: none !important; /* REMOVE A FAIXA PRETA/SOMBRA DO TEXTO */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transition: all 0.3s ease;
+}
 
+.stButton > button:hover {
+    background-color: #30363d !important; /* Cinza levemente mais claro no hover */
+    color: #ffffff !important;
+    border-color: #60a5fa !important; /* Brilho azul sutil na borda ao aproximar */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+}
+
+.stButton > button:focus, .stButton > button:active {
+    background-color: #161b22 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: none !important;
+}
     /* 9. SLIDER E TABS */
     .stSlider label, .stSlider span { color: #ffffff !important; }
     .stTabs [data-baseweb="tab-list"] { background-color: transparent !important; }
