@@ -139,7 +139,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. CORE: CONFIGURAÇÃO DA API ---
+# --- 3. CORE: CONFIGURAÇÃO DA API E TRATAMENTO DE ERRO ---
 api_key = os.environ.get("GEMINI_API_KEY")
 MODEL_NAME = "models/gemini-3-flash-preview"
 if api_key:
@@ -150,7 +150,7 @@ def extrair_texto_docx(arquivo_docx):
     return "\n".join([p.text for p in doc.paragraphs])
 
 # --- 4. NAVEGAÇÃO SUPERIOR ---
-st.markdown('<div style="text-align: center; font-weight: 700; color: #94a3b8; margin-top: 15px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;">Command Center v9.0</div>', unsafe_allow_html=True)
+st.markdown('<div style="text-align: center; font-weight: 700; color: #94a3b8; margin-top: 15px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;">Command Center v9.3</div>', unsafe_allow_html=True)
 
 menu_opcoes = [
     "🏠 Dashboard Inicial", 
@@ -164,7 +164,7 @@ menu_opcoes = [
 menu_selecionado = st.selectbox("Menu", menu_opcoes, label_visibility="collapsed")
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# --- 5. GESTÃO DE ESTADO ---
+# --- 5. GESTÃO DE ESTADO (TAGS) ---
 if 'tags' not in st.session_state:
     st.session_state.tags = ["Novas Leis", "Concorrência", "Inovação Tech", "Cenário Macro", "ESG"]
 
@@ -174,94 +174,78 @@ if 'tags' not in st.session_state:
 if "🏠 Dashboard Inicial" in menu_selecionado:
     st.markdown('<div class="main-title">TechnoBolt IA ⚡</div>', unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color: #94a3b8 !important; font-size: 18px;'>Hub Unificado de Inteligência Corporativa Sênior.</p>", unsafe_allow_html=True)
-    
     col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("### 📄 Documentos\nResumos executivos focados em traduzir complexidade técnica para tomada de decisão.")
-    with col2:
-        st.markdown("### 📧 Email Intel\nAuditoria de múltiplos e-mails em PDF com geração automática de minutas de resposta.")
-    with col3:
-        st.markdown("### 📊 Inteligência\nMonitoramento de mercado e análise de sentimento para retenção de clientes.")
-    
-    st.markdown("---")
-    st.markdown("### 🛠️ Guia de Operação:\n1. Use o menu no topo para navegar.\n2. No **Analisador**, suba PDF/DOCX para relatórios McKinsey-style.\n3. No **Email Intel**, suba vários PDFs para processamento em lote.")
+    with col1: st.markdown("### 📄 Documentos\nResumos executivos traduzidos para visão estratégica.")
+    with col2: st.markdown("### 📧 Email Intel\nAuditoria em lote de PDFs com minutas de resposta.")
+    with col3: st.markdown("### 📊 Inteligência\nMonitoramento competitivo e prevenção de Churn.")
 
-# ANALISADOR DE DOCUMENTOS
+# ANALISADOR
 elif "📁 Analisador de Documentos" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📁 Analisador de Documentos</h1></div>', unsafe_allow_html=True)
     arquivo = st.file_uploader("Upload (PDF, DOCX, TXT):", type=["pdf", "docx", "txt"])
     if arquivo and st.button("🔍 EXECUTAR ANÁLISE ESTRATÉGICA"):
-        with st.spinner("Processando inteligência técnica..."):
+        with st.spinner("Processando..."):
             try:
                 model = genai.GenerativeModel(MODEL_NAME)
                 if arquivo.type == "application/pdf":
                     conteudo = [{"mime_type": "application/pdf", "data": arquivo.read()}]
                 elif arquivo.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
                     texto = extrair_texto_docx(arquivo)
-                    conteudo = [f"Analise estrategicamente este Word:\n\n{texto}"]
+                    conteudo = [f"Texto Word: {texto}"]
                 else:
                     conteudo = [arquivo.read().decode("utf-8")]
 
-                prompt = """
-                Atue como Consultor Sênior McKinsey. Analise o documento e gere:
-                - **RESUMO EXECUTIVO** direto ao ponto.
-                - **ANÁLISE DE IMPACTO** (RISCO, CUSTO, OPORTUNIDADE).
-                - **PLANO DE AÇÃO** de 3 passos.
-                - **SUGESTÃO DE RESPOSTA** formal.
-                """
-                response = model.generate_content([prompt] + conteudo)
-                st.markdown(response.text)
-            except Exception as e: st.error(f"Erro: {e}")
+                prompt = "Aja como Consultor McKinsey. Gere: Resumo Executivo, Análise de Impacto (Risco/Custo) e Plano de Ação."
+                res = model.generate_content([prompt] + conteudo)
+                st.markdown(res.text)
+            except Exception as e:
+                if "429" in str(e): st.error("⚠️ Cota diária atingida (20 requisições). Tente amanhã ou use o faturamento Pay-as-you-go.")
+                else: st.error(f"Erro: {e}")
 
-# NOVA SOLUÇÃO: EMAIL INTEL AUDITORIA
+# EMAIL INTEL (AUDITORIA EM LOTE)
 elif "📧 Email Intel" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📧 Email Intel: Auditoria & Resposta</h1></div>', unsafe_allow_html=True)
     col_a, col_b = st.columns([1, 2])
     with col_a:
         arquivos = st.file_uploader("Anexe e-mails (PDF):", type=["pdf"], accept_multiple_files=True)
-        cargo = st.text_input("Seu Cargo para Resposta:", placeholder="Ex: Diretor Financeiro")
-        tom = st.selectbox("Tom da Resposta:", ["Executivo/Direto", "Diplomático", "Firme", "Cordial"])
+        cargo = st.text_input("Seu Cargo:", placeholder="Ex: Diretor de Operações")
         disparar = st.button("🔍 AUDITAR EM LOTE")
     with col_b:
         if arquivos and disparar:
             model = genai.GenerativeModel(MODEL_NAME)
             for i, pdf in enumerate(arquivos):
                 with st.expander(f"E-mail {i+1}: {pdf.name}", expanded=True):
-                    conteudo_pdf = [{"mime_type": "application/pdf", "data": pdf.read()}]
-                    prompt_intel = f"Resuma este e-mail, identifique riscos e proponha uma resposta como {cargo} em tom {tom}."
-                    res = model.generate_content([prompt_intel] + conteudo_pdf)
-                    st.markdown(res.text)
+                    try:
+                        pdf_data = [{"mime_type": "application/pdf", "data": pdf.read()}]
+                        res = model.generate_content([f"Resuma este e-mail e proponha resposta como {cargo}.", pdf_data[0]])
+                        st.markdown(res.text)
+                    except Exception as e:
+                        if "429" in str(e): st.error("⚠️ Cota atingida.")
+                        else: st.error(f"Erro em {pdf.name}: {e}")
 
-# GERADOR DE EMAIL (INDIVIDUAL)
+# GERADOR DE EMAIL
 elif "✉️ Gerador de Email" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>✉️ Gerador de Email Inteligente</h1></div>', unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1: cargo_e = st.text_input("Seu Cargo:", placeholder="Ex: VP de Operações")
-    with c2: dest_e = st.text_input("Para:", placeholder="Ex: Diretoria Executiva")
-    obj_e = st.text_area("Objetivo da Mensagem:")
-    formalidade = st.select_slider("Formalidade:", ["Casual", "Cordial", "Executivo", "Rígido"], value="Executivo")
+    cargo_e = st.text_input("Seu Cargo:")
+    obj_e = st.text_area("Objetivo:")
+    formalidade = st.select_slider("Formalidade:", ["Casual", "Executivo", "Rígido"], value="Executivo")
     if st.button("🚀 GERAR COMUNICAÇÃO"):
-        model = genai.GenerativeModel(MODEL_NAME)
-        res = model.generate_content(f"Como {cargo_e}, escreva para {dest_e} sobre {obj_e}. Tom {formalidade}.")
-        st.text_area("Rascunho:", res.text, height=400)
-
-# BRIEFING
-elif "🧠 Briefing Negocial" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>🧠 Briefing Estratégico</h1></div>', unsafe_allow_html=True)
-    empresa = st.text_input("Empresa Alvo:")
-    if st.button("⚡ ESCANEAR MERCADO"):
-        model = genai.GenerativeModel(MODEL_NAME)
-        res = model.generate_content(f"Gere um briefing estratégico 2025 para a empresa {empresa}.")
-        st.markdown(res.text)
+        try:
+            model = genai.GenerativeModel(MODEL_NAME)
+            res = model.generate_content(f"Como {cargo_e}, escreva para destinatário sobre {obj_e}. Tom {formalidade}.")
+            st.text_area("Rascunho:", res.text, height=400)
+        except Exception as e: st.error("Erro de Cota ou API.")
 
 # ATAS
 elif "📝 Analista de Atas" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📝 Analista de Atas</h1></div>', unsafe_allow_html=True)
     notas = st.text_area("Notas da reunião:", height=300)
     if st.button("📝 FORMALIZAR"):
-        model = genai.GenerativeModel(MODEL_NAME)
-        res = model.generate_content(f"Aja como Secretário de Governança. Transforme em ata formal: {notas}")
-        st.markdown(res.text)
+        try:
+            model = genai.GenerativeModel(MODEL_NAME)
+            res = model.generate_content(f"Aja como Secretário de Governança. Transforme em ata formal: {notas}")
+            st.markdown(res.text)
+        except Exception as e: st.error("Erro ao processar ata.")
 
 # INTELIGÊNCIA COMPETITIVA
 elif "📈 Inteligência Competitiva" in menu_selecionado:
@@ -270,15 +254,19 @@ elif "📈 Inteligência Competitiva" in menu_selecionado:
     with t1:
         rival = st.text_input("Nome do Rival:")
         if st.button("📡 ANALISAR"):
-            model = genai.GenerativeModel(MODEL_NAME)
-            res = model.generate_content(f"Analise a estratégia da empresa {rival}.")
-            st.markdown(res.text)
+            try:
+                model = genai.GenerativeModel(MODEL_NAME)
+                res = model.generate_content(f"Analise a estratégia da empresa {rival}.")
+                st.markdown(res.text)
+            except Exception as e: st.error("Erro de API.")
     with t2:
         feed = st.text_area("Feedback do cliente:")
         if st.button("🧠 PREVER RISCO"):
-            model = genai.GenerativeModel(MODEL_NAME)
-            res = model.generate_content(f"Qual o risco de churn para: {feed}")
-            st.markdown(res.text)
+            try:
+                model = genai.GenerativeModel(MODEL_NAME)
+                res = model.generate_content(f"Qual o risco de churn para: {feed}")
+                st.markdown(res.text)
+            except Exception as e: st.error("Erro de API.")
 
 st.markdown("<hr>", unsafe_allow_html=True)
-st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Master Edition v9.0")
+st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Resilience Edition v9.3")
