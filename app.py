@@ -108,13 +108,15 @@ st.markdown("""
         padding: 10px 25px !important;
     }
 
-    /* 8. BOTÕES EXECUTIVOS (VERDE VIBRANTE SEM FAIXA PRETA) */
+    /* 8. BOTÕES EXECUTIVOS (CORREÇÃO DE FAIXA PRETA E SOMBRA) */
     .stButton > button { 
         width: 100%; border-radius: 14px; height: 4.5em; font-weight: 700; 
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        background-color: #10b981 !important; /* Verde sólido para evitar bugs de gradiente */
+        color: #ffffff !important; 
         border: none !important;
         outline: none !important;
-        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2) !important;
+        box-shadow: none !important; 
+        text-shadow: none !important; /* REMOVE SOMBRA INTERNA DO TEXTO */
         text-transform: uppercase;
         letter-spacing: 1.5px;
     }
@@ -124,7 +126,7 @@ st.markdown("""
         color: #ffffff !important;
         border: none !important;
         outline: none !important;
-        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4) !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
         transform: translateY(-2px);
     }
 
