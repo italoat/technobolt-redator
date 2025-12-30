@@ -12,16 +12,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. CSS PREMIUM GLASSMORPHISM (BLINDAGEM TOTAL DARK) ---
+# --- 2. CSS PREMIUM (BARRAS EM CINZA ESCURO E DARK MODE ABSOLUTO) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
 
-    /* 1. FUNDO ESCURO GLOBAL ABSOLUTO */
+    /* 1. FUNDO PRETO GLOBAL */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], 
     .stApp, [data-testid="stMain"], [data-testid="stVerticalBlock"],
-    [data-testid="stMarkdownContainer"], .main, [data-testid="stBlock"],
-    div[role="dialog"], div[data-baseweb="popover"], [data-testid="stExpander"] {
+    [data-testid="stMarkdownContainer"], .main, [data-testid="stBlock"] {
         background-color: #05070a !important;
         font-family: 'Inter', sans-serif !important;
         color: #ffffff !important;
@@ -32,7 +31,7 @@ st.markdown("""
     header { visibility: hidden !important; }
     footer { visibility: hidden !important; }
 
-    /* 3. FORÇA FONTES BRANCAS E LEGÍVEIS EM TUDO (MESMO DENTRO DE BARRAS) */
+    /* 3. FORÇA FONTES BRANCAS EM TUDO */
     * { 
         color: #f8fafc !important; 
         -webkit-text-fill-color: #f8fafc !important;
@@ -52,43 +51,46 @@ st.markdown("""
         backdrop-filter: blur(12px);
         padding: 40px; border-radius: 24px; margin-bottom: 35px; 
         text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
-    /* 5. CORREÇÃO DA BARRA DE SERVIÇOS (SELECTBOX) - REMOVE O BRANCO E GARANTE LEITURA */
+    /* 5. CONFIGURAÇÃO DAS BARRAS (CINZA ESCURO #161b22) */
+    /* Selectbox (Barra de Serviços) */
     div[data-baseweb="select"] {
-        background-color: rgba(15, 23, 42, 0.8) !important;
-        border: 1px solid rgba(59, 130, 246, 0.5) !important;
-        border-radius: 14px !important;
+        background-color: #161b22 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 12px !important;
     }
     
-    /* Fundo da lista flutuante aberta */
+    /* Dropdown da lista aberta */
     div[data-baseweb="popover"] > div, ul[role="listbox"], [data-baseweb="listbox"] {
-        background-color: #0f172a !important;
+        background-color: #161b22 !important;
         color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    /* Cor do texto dentro da barra fechada */
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-        color: #ffffff !important;
+        border: 1px solid #30363d !important;
     }
 
-    /* 6. BOTÃO "BROWSE FILES" E UPLOADER */
+    /* Inputs de texto e áreas de texto */
+    .stTextInput input, .stTextArea textarea {
+        background-color: #161b22 !important;
+        color: #ffffff !important;
+        border: 1px solid #30363d !important;
+        border-radius: 12px !important;
+        padding: 15px !important;
+    }
+
+    /* 6. BOTÃO DE UPLOAD E "BROWSE FILES" */
+    [data-testid="stFileUploader"] section {
+        background-color: #161b22 !important;
+        border: 2px dashed #3b82f6 !important;
+        border-radius: 15px !important;
+    }
+    
     [data-testid="stFileUploader"] button {
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
         color: white !important;
-        border: none !important;
-        border-radius: 10px !important;
-    }
-    
-    [data-testid="stFileUploader"] section {
-        background-color: rgba(15, 23, 42, 0.6) !important;
-        border: 2px dashed rgba(59, 130, 246, 0.5) !important;
-        border-radius: 15px !important;
+        border-radius: 8px !important;
     }
 
-    /* 7. BOTÃO EXECUTIVO PRINCIPAL (VERDE GLOSSY) */
+    /* 7. BOTÕES EXECUTIVOS (VERDE VIBRANTE) */
     .stButton > button { 
         width: 100%; border-radius: 14px; height: 4.5em; font-weight: 700; 
         background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
@@ -97,25 +99,16 @@ st.markdown("""
         box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2) !important;
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        transition: 0.4s all ease;
+        transition: 0.3s all ease;
     }
     
     .stButton > button:hover {
-        transform: translateY(-3px);
+        transform: translateY(-2px);
         box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4) !important;
         filter: brightness(1.1);
     }
 
-    /* 8. INPUTS MODERNOS (TEXTO BRANCO GARANTIDO) */
-    .stTextInput input, .stTextArea textarea {
-        background-color: rgba(15, 23, 42, 0.8) !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 14px !important;
-        padding: 18px !important;
-    }
-    
-    /* 9. SLIDER DE FORMALIDADE */
+    /* 8. SLIDER DE FORMALIDADE */
     .stSlider label, .stSlider span { color: #ffffff !important; }
 
     hr { border: 0.5px solid rgba(255, 255, 255, 0.1) !important; margin: 40px 0; }
@@ -133,7 +126,7 @@ def extrair_texto_docx(arquivo_docx):
     return "\n".join([p.text for p in doc.paragraphs])
 
 # --- 4. NAVEGAÇÃO SUPERIOR ---
-st.markdown('<div style="text-align: center; font-weight: 700; color: #94a3b8; margin-top: 20px; font-size: 12px; letter-spacing: 4px; text-transform: uppercase;">Command Center v7.2</div>', unsafe_allow_html=True)
+st.markdown('<div style="text-align: center; font-weight: 700; color: #94a3b8; margin-top: 20px; font-size: 12px; letter-spacing: 4px; text-transform: uppercase;">Command Center v7.3</div>', unsafe_allow_html=True)
 
 menu_opcoes = [
     "🏠 Dashboard Inicial", 
@@ -167,10 +160,10 @@ if "🏠 Dashboard Inicial" in menu_selecionado:
     st.markdown("---")
     st.markdown("""
     ### 🛠️ Guia de Operação Corporativa:
-    1. **Navegação:** Utilize o menu no topo para alternar entre os 6 módulos.
+    1. **Navegação:** Utilize o menu no topo para alternar entre os módulos.
     2. **Analisador:** Suba arquivos **PDF, DOCX ou TXT**. Processamento McKinsey-style.
     3. **Briefing:** Informe empresa e setor para radar de mercado 2025.
-    4. **Atas:** Formalize reuniões a partir de notas brutas.
+    4. **Atas:** Formalize reuniões a partir de anotações brutas.
     """)
 
 elif "📁 Analisador de Documentos" in menu_selecionado:
@@ -203,13 +196,11 @@ elif "📁 Analisador de Documentos" in menu_selecionado:
                 except Exception as e: st.error(f"Erro: {e}")
 
 elif "✉️ Gerador de Email" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>✉️ Gerador de Email Inteligente</h1><p>Redação executiva estratégica</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="product-header"><h1>✉️ Gerador de Email Inteligente</h1></div>', unsafe_allow_html=True)
     c_e1, c_e2 = st.columns(2)
     with c_e1: cargo = st.text_input("Seu Cargo:", placeholder="Ex: Diretor de Operações")
     with c_e2: dest = st.text_input("Destinatário:", placeholder="Ex: CEO da Holding")
     obj = st.text_area("Objetivo da Mensagem:", placeholder="Ex: Justificar aumento de orçamento...")
-    
-    # RESTAURAÇÃO DA LINHA DE FORMALIDADE
     formalidade = st.select_slider("Grau de Formalidade:", ["Casual", "Cordial", "Executivo", "Rígido"], value="Executivo")
     
     if st.button("🚀 GERAR COMUNICAÇÃO PROFISSIONAL"):
@@ -229,14 +220,6 @@ elif "🧠 Briefing Negocial" in menu_selecionado:
         res = model.generate_content(f"Briefing executivo para {empresa} no setor {setor} sobre {tags_s}.")
         st.markdown(res.text)
 
-elif "📝 Analista de Atas" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>📝 Analista de Atas</h1></div>', unsafe_allow_html=True)
-    notas = st.text_area("Insira as notas brutas:", height=300)
-    if st.button("📝 FORMALIZAR ATA"):
-        model = genai.GenerativeModel(MODEL_NAME)
-        res = model.generate_content(f"Transforme em ata formal: {notas}")
-        st.markdown(res.text)
-
 elif "📈 Inteligência Competitiva" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📈 Inteligência & Churn</h1></div>', unsafe_allow_html=True)
     t1, t2 = st.tabs(["🔍 Radar Rival", "⚠️ Churn"])
@@ -254,4 +237,4 @@ elif "📈 Inteligência Competitiva" in menu_selecionado:
             st.markdown(res.text)
 
 st.markdown("<hr>", unsafe_allow_html=True)
-st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Edição Final v7.2")
+st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Gray Bar Edition v7.3")
