@@ -12,124 +12,91 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. CSS ULTRA-BLINDADO (DARK MODE ABSOLUTO E BOTÕES VERDES) ---
+# --- 2. CSS PREMIUM GLASSMORPHISM (DARK MODE ABSOLUTO) ---
 st.markdown("""
 <style>
-    /* 1. FUNDO ESCURO GLOBAL ABSOLUTO EM TODOS OS NÍVEIS */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+
+    /* FUNDO ESCURO GLOBAL */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], 
-    .stApp, [data-testid="stMain"], [data-testid="stVerticalBlock"],
-    [data-testid="stMarkdownContainer"], .main, [data-testid="stBlock"],
-    div[role="dialog"], div[data-baseweb="popover"], [data-testid="stExpander"] {
-        background-color: #0d1117 !important;
-        color: #ffffff !important;
+    .stApp, [data-testid="stMain"], [data-testid="stVerticalBlock"] {
+        background-color: #05070a !important;
+        font-family: 'Inter', sans-serif !important;
     }
 
-    /* 2. REMOÇÃO DE ELEMENTOS NATIVOS E CABEÇALHOS DO STREAMLIT */
-    [data-testid="stSidebar"] { display: none !important; }
-    header { visibility: hidden !important; }
-    footer { visibility: hidden !important; }
-
-    /* 3. FORÇA TODAS AS FONTES PARA BRANCO (ESTADO ATIVO E INATIVO) */
-    h1, h2, h3, h4, h5, h6, p, label, span, div, .stMarkdown, 
-    [data-testid="stWidgetLabel"] p, [data-testid="stMarkdownContainer"] p,
-    [data-testid="stHeader"], .stSelectbox label, .stTextInput label,
-    .stTextArea label, [data-testid="stMetricValue"], 
-    input, textarea, [data-baseweb="select"] * { 
-        color: #ffffff !important; 
-        -webkit-text-fill-color: #ffffff !important;
+    /* FORÇA FONTES BRANCAS EM TUDO */
+    * { 
+        color: #f8fafc !important; 
+        -webkit-text-fill-color: #f8fafc !important;
     }
 
-    /* 4. TÍTULO E CABEÇALHOS CORPORATIVOS CUSTOMIZADOS */
+    /* HEADER CORPORATIVO COM GRADIENTE */
     .main-title { 
-        font-size: 38px; font-weight: 900; text-align: center; 
-        margin-top: 10px; margin-bottom: 5px; color: #ffffff !important;
-        letter-spacing: -1.5px;
+        font-size: 48px; font-weight: 900; text-align: center; 
+        background: linear-gradient(to right, #60a5fa, #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent !important;
+        letter-spacing: -2px; margin-bottom: 5px;
     }
+
     .product-header { 
-        background: linear-gradient(135deg, #1f2937 0%, #111827 100%); 
-        padding: 30px; border-radius: 18px; margin-bottom: 30px; 
-        text-align: center; border: 1px solid #374151;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        background: rgba(30, 41, 59, 0.4); 
+        backdrop-filter: blur(12px);
+        padding: 40px; border-radius: 24px; margin-bottom: 35px; 
+        text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
-    /* 5. CORREÇÃO DA BARRA DE SERVIÇOS (SELECTBOX) E MENU SUSPENSO (EVITA BRANCO) */
+    /* MENU SELECTBOX - DROPDOWN DARK */
     div[data-baseweb="select"] {
-        background-color: #161b22 !important;
-        border: 1px solid #30363d !important;
-        border-radius: 12px !important;
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid rgba(59, 130, 246, 0.5) !important;
+        border-radius: 14px !important;
     }
     
-    /* Fundo da lista flutuante aberta e itens */
-    div[data-baseweb="popover"] > div, ul[role="listbox"], [data-baseweb="listbox"] {
-        background-color: #161b22 !important;
-        color: #ffffff !important;
-        border: 1px solid #30363d !important;
-    }
-    
-    li[role="option"] {
-        background-color: #161b22 !important;
-        color: #ffffff !important;
-        transition: 0.2s;
-    }
-    
-    li[role="option"]:hover, li[aria-selected="true"] {
-        background-color: #1d4ed8 !important;
-        color: #ffffff !important;
+    div[data-baseweb="popover"] > div, ul[role="listbox"] {
+        background-color: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
-    /* 6. INPUTS E TEXTAREAS (GARANTE QUE O TEXTO DIGITADO SEJA BRANCO) */
-    .stTextInput input, .stTextArea textarea {
-        background-color: #161b22 !important;
-        color: #ffffff !important;
-        border: 1px solid #30363d !important;
-        border-radius: 12px !important;
-        padding: 15px !important;
-    }
-
-    /* 7. BOTÕES EXECUTIVOS PREMIUM (VERDE SÓLIDO SEM FAIXAS PRETAS) */
-    .stButton > button { 
-        width: 100%; border-radius: 12px; height: 4.2em; font-weight: bold; 
-        background-color: #238636 !important; /* Verde Corporativo Sólido */
-        color: #ffffff !important; 
-        border: none !important;
-        outline: none !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        transition: all 0.3s ease;
-    }
-    
-    .stButton > button:hover, .stButton > button:focus, .stButton > button:active {
-        background-color: #2ea043 !important;
-        color: #ffffff !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: 0 8px 15px rgba(35, 134, 54, 0.4) !important;
-    }
-
-    /* 8. CORREÇÃO DO BOTÃO "BROWSE FILES" (UPLOADER) - REMOVE O BRANCO */
+    /* BOTÃO "BROWSE FILES" CUSTOMIZADO */
     [data-testid="stFileUploader"] button {
-        background-color: #3b82f6 !important;
-        color: #ffffff !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: white !important;
         border: none !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
+        padding: 10px 25px !important;
+        font-weight: 700 !important;
+    }
+
+    /* BOTÃO PRINCIPAL VERDE GLOSSY */
+    .stButton > button { 
+        width: 100%; border-radius: 14px; height: 4.5em; font-weight: 700; 
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2) !important;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        transition: 0.4s all ease;
     }
     
-    [data-testid="stFileUploader"] section {
-        background-color: #161b22 !important;
-        border: 2px dashed #30363d !important;
-        border-radius: 15px;
-        padding: 20px;
-        color: #ffffff !important;
+    .stButton > button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4) !important;
+        filter: brightness(1.1);
     }
 
-    /* 9. ABAS (TABS), SLIDERS E TAGS */
-    .stTabs [data-baseweb="tab-list"] { background-color: transparent !important; }
-    .stTabs [data-baseweb="tab"] { color: #ffffff !important; font-weight: 700; }
-    .stSlider label, .stSlider span { color: #ffffff !important; }
-    span[data-baseweb="tag"] { background-color: #1d4ed8 !important; color: #ffffff !important; border-radius: 5px; }
+    /* INPUTS MODERNOS */
+    .stTextInput input, .stTextArea textarea {
+        background-color: rgba(15, 23, 42, 0.8) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 14px !important;
+        padding: 18px !important;
+    }
 
-    hr { border: 0.5px solid #30363d !important; margin: 30px 0; }
+    hr { border: 0.5px solid rgba(255, 255, 255, 0.1) !important; margin: 40px 0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -140,15 +107,15 @@ MODEL_NAME = "models/gemini-3-flash-preview"
 if api_key:
     genai.configure(api_key=api_key)
 else:
-    st.error("⚠️ Configuração Pendente: GEMINI_API_KEY não encontrada.")
+    st.error("⚠️ Erro: Chave de API não encontrada.")
 
 def extrair_texto_docx(arquivo_docx):
-    """Extração de texto para suporte total a documentos Microsoft Word (.docx)."""
+    """Extração profunda de arquivos Microsoft Word."""
     doc = docx.Document(arquivo_docx)
     return "\n".join([para.text for para in doc.paragraphs])
 
-# --- 4. SISTEMA DE NAVEGAÇÃO SUPERIOR (COMMAND CENTER) ---
-st.markdown('<div style="text-align: center; font-weight: bold; color: #3b82f6; margin-top: 15px; font-size: 14px; letter-spacing: 2px;">TECHNOBOLT AI COMMAND CENTER</div>', unsafe_allow_html=True)
+# --- 4. NAVEGAÇÃO SUPERIOR ---
+st.markdown('<div style="text-align: center; font-weight: 700; color: #94a3b8; margin-top: 20px; font-size: 12px; letter-spacing: 4px;">TECHNOBOLT COMMAND CENTER v7.1</div>', unsafe_allow_html=True)
 
 menu_opcoes = [
     "🏠 Dashboard Inicial", 
@@ -158,42 +125,42 @@ menu_opcoes = [
     "📝 Analista de Atas de Governança",
     "📈 Inteligência Competitiva & Churn"
 ]
-menu_selecionado = st.selectbox("Selecione o Módulo Ativo", menu_opcoes, label_visibility="collapsed")
+menu_selecionado = st.selectbox("Menu", menu_opcoes, label_visibility="collapsed")
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# --- 5. GESTÃO DE ESTADO (MEMÓRIA DE TAGS E SESSÃO) ---
+# --- 5. GESTÃO DE ESTADO ---
 if 'tags' not in st.session_state:
     st.session_state.tags = ["Novas Leis", "Concorrência", "Inovação Tech", "Cenário Macro", "ESG"]
 
 # --- 6. TELAS DO HUB ---
 
-# --- TELA: DASHBOARD INICIAL ---
+# --- TELA: DASHBOARD ---
 if "🏠 Dashboard Inicial" in menu_selecionado:
-    st.markdown('<div class="main-title">TechnoBolt IA ⚡</div>', unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color: #9ca3af !important; font-size: 18px;'>Plataforma Unificada de Inteligência Corporativa Sênior.</p>", unsafe_allow_html=True)
+    st.markdown('<div class="main-title">TechnoBolt IA</div>', unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color: #64748b !important; font-size: 20px; margin-bottom: 40px;'>Inteligência Corporativa de Próxima Geração.</p>", unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("### 📄 Documentos\nResumos executivos focados em traduzir complexidade técnica para Riscos, Custos e Ações estratégicas.")
     with col2:
-        st.markdown("### ✉️ Comunicação\nRedação de e-mails executivos de alto impacto com ajuste fino de cargo, destinatário e tom profissional.")
+        st.markdown("### ✉️ Comunicação\nRedação de e-mails executivos de alto impacto com ajuste fino de tom profissional.")
     with col3:
-        st.markdown("### 📊 Inteligência\nMonitoramento competitivo de rivais e análise de sentimento para prevenção ativa de perda de clientes (Churn).")
+        st.markdown("### 📊 Inteligência\nMonitoramento competitivo de rivais e análise de sentimento para prevenção de Churn.")
     
     st.markdown("---")
     st.markdown("""
     ### 🛠️ Guia de Operação Corporativa:
-    1. **Navegação Inteligente:** Utilize o menu suspenso central no topo para alternar entre as ferramentas.
-    2. **Analisador:** Faça upload de arquivos **PDF, DOCX ou TXT**. O sistema processa o conteúdo sob a ótica de um Consultor Sênior.
-    3. **Briefing Negocial:** Ideal para panoramas rápidos. Informe empresa e setor para receber um radar de mercado 2025.
-    4. **Governança:** Utilize o Analista de Atas para formalizar reuniões complexas a partir de anotações brutas de diretoria.
-    5. **Prevenção:** Use a aba de Churn para colar e-mails críticos de clientes e receber estratégias imediatas de retenção.
+    1. **Navegação:** Utilize o menu suspenso no topo para alternar entre os 6 módulos.
+    2. **Analisador:** Suba arquivos **PDF, DOCX ou TXT**. O sistema analisa sob a ótica de um Consultor Sênior.
+    3. **Briefing:** Informe empresa e setor para receber um radar de mercado 2025 completo.
+    4. **Atas:** Formalize reuniões a partir de anotações brutas de diretoria.
+    5. **Churn:** Cole feedbacks críticos para receber estratégias imediatas de retenção de clientes.
     """)
 
 # --- TELA: ANALISADOR DE DOCUMENTOS ---
 elif "📁 Analisador de Documentos" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>📁 Analisador de Documentos & Tradutor de Gestão</h1><p>Processamento inteligente para PDF, DOCX (Word) e TXT</p></div>', unsafe_allow_html=True)
-    arquivo = st.file_uploader("Suba o relatório técnico, contrato ou proposta comercial:", type=["pdf", "docx", "txt"])
+    st.markdown('<div class="product-header"><h1>📁 Analisador de Documentos & Tradutor de Gestão</h1><p>Suporte para PDF, DOCX (Word) e TXT</p></div>', unsafe_allow_html=True)
+    arquivo = st.file_uploader("Suba o relatório técnico ou contrato:", type=["pdf", "docx", "txt"])
     
     if arquivo:
         if st.button("🔍 EXECUTAR ANÁLISE ESTRATÉGICA"):
@@ -204,103 +171,81 @@ elif "📁 Analisador de Documentos" in menu_selecionado:
                         conteudo_ia = [{"mime_type": "application/pdf", "data": arquivo.read()}]
                     elif arquivo.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
                         texto_w = extrair_texto_docx(arquivo)
-                        conteudo_ia = [f"Analise estrategicamente este conteúdo extraído de um documento Word:\n\n{texto_w}"]
+                        conteudo_ia = [f"Analise o seguinte conteúdo extraído de um Word:\n\n{texto_w}"]
                     else:
                         conteudo_ia = [arquivo.read().decode("utf-8")]
 
                     prompt_doc = """
-                    Você é um Consultor de Estratégia Sênior (ex-McKinsey). Analise o documento em anexo e produza um relatório executivo estruturado:
+                    Você é um Consultor de Estratégia Sênior (ex-McKinsey). Analise o documento em anexo e produza um relatório executivo:
                     - **RESUMO EXECUTIVO:** Do que se trata o documento em linguagem simples e executiva.
                     - **ANÁLISE DE IMPACTO:** Traduza termos técnicos para RISCO, CUSTO ESTIMADO e OPORTUNIDADES.
                     - **PONTOS CRÍTICOS:** O que o gestor NÃO pode ignorar sob nenhuma hipótese.
                     - **PLANO DE AÇÃO:** 3 passos imediatos sugeridos baseados em boas práticas de mercado.
-                    - **SUGESTÃO DE RESPOSTA:** Um rascunho de e-mail ou feedback formal para o autor do documento.
+                    - **SUGESTÃO DE RESPOSTA:** Um rascunho de e-mail formal para o autor do documento.
                     """
                     response = model.generate_content([prompt_doc] + conteudo_ia)
                     st.markdown("---")
                     st.markdown("### 📊 Resultado da Análise Gerencial")
                     st.markdown(response.text)
-                    st.download_button("📥 Baixar Relatório (.md)", response.text, file_name="analise_technobolt.md")
-                except Exception as e: st.error(f"Erro no processamento do arquivo: {e}")
+                except Exception as e: st.error(f"Erro: {e}")
 
 # --- TELA: GERADOR DE EMAIL ---
 elif "✉️ Gerador de Email" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>✉️ Gerador de Email Inteligente</h1><p>Redação executiva de alto impacto e tom ajustável</p></div>', unsafe_allow_html=True)
-    col_em1, col_em2 = st.columns(2)
-    with col_em1: cargo = st.text_input("Seu Cargo:", placeholder="Ex: Diretor de Operações")
-    with col_em2: dest = st.text_input("Destinatário:", placeholder="Ex: CEO da Holding")
-    obj = st.text_area("Objetivo Central da Mensagem:", placeholder="Ex: Justificar a necessidade de aporte no projeto de expansão...")
-    formalidade = st.select_slider("Grau de Formalidade:", ["Casual", "Cordial", "Executivo", "Rígido"], value="Executivo")
+    st.markdown('<div class="product-header"><h1>✉️ Gerador de Email Inteligente</h1><p>Redação executiva estratégica</p></div>', unsafe_allow_html=True)
+    c_e1, c_e2 = st.columns(2)
+    with c_e1: cargo = st.text_input("Seu Cargo:", placeholder="Ex: Diretor de Operações")
+    with c_e2: dest = st.text_input("Destinatário:", placeholder="Ex: CEO da Holding")
+    obj = st.text_area("Objetivo Central da Mensagem:", placeholder="Ex: Justificar o aumento de orçamento...")
     
     if st.button("🚀 GERAR COMUNICAÇÃO PROFISSIONAL"):
-        with st.spinner("IA redigindo conteúdo profissional estratégico..."):
-            try:
-                model = genai.GenerativeModel(MODEL_NAME)
-                prompt_email = f"Como {cargo}, escreva um e-mail para {dest} focado em {obj}. Utilize um tom {formalidade}. Seja conciso e persuasivo."
-                res = model.generate_content(prompt_email)
-                st.text_area("Rascunho disponível para uso:", res.text, height=450)
-            except Exception as e: st.error(f"Erro na geração do e-mail: {e}")
+        with st.spinner("IA redigindo conteúdo profissional..."):
+            model = genai.GenerativeModel(MODEL_NAME)
+            prompt_email = f"Como {cargo}, escreva um e-mail para {dest} sobre {obj}. Use tom executivo, conciso e direto."
+            res = model.generate_content(prompt_email)
+            st.text_area("Rascunho:", res.text, height=450)
 
 # --- TELA: BRIEFING NEGOCIAL ---
 elif "🧠 Briefing Negocial" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>🧠 Briefing Negocial Estratégico</h1><p>Radar de mercado em tempo real e monitoramento de tendências</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="product-header"><h1>🧠 Briefing Negocial Estratégico</h1><p>Radar de mercado e tendências 2025</p></div>', unsafe_allow_html=True)
     c_b1, c_b2 = st.columns(2)
-    with c_b1: empresa_alvo = st.text_input("Nome da Empresa Alvo:")
-    with c_b2: setor_atuacao = st.text_input("Setor de Atuação:")
+    with c_b1: empresa = st.text_input("Empresa Alvo:")
+    with c_b2: setor = st.text_input("Setor:")
     
-    tags_s = st.multiselect("Pilares do Radar de Inteligência:", options=st.session_state.tags, default=["Novas Leis", "Concorrência"])
+    tags_s = st.multiselect("Radar:", options=st.session_state.tags, default=["Novas Leis"])
     
-    nova_tag = st.text_input("➕ Adicionar Novo Filtro ao seu Radar Personalizado:")
-    if nova_tag and nova_tag not in st.session_state.tags:
-        st.session_state.tags.append(nova_tag)
-        st.rerun()
-    
-    if st.button("⚡ ESCANEAR MERCADO E TENDÊNCIAS"):
-        with st.spinner("Cruzando notícias e dados estratégicos de 2025..."):
-            try:
-                model = genai.GenerativeModel(MODEL_NAME)
-                prompt_briefing = f"Gere um briefing executivo para a empresa {empresa_alvo} no setor {setor_atuacao} focando nos seguintes pilares estratégicos: {tags_s}."
-                res = model.generate_content(prompt_briefing)
-                st.markdown(res.text)
-            except Exception as e: st.error(f"Erro no briefing: {e}")
+    if st.button("⚡ ESCANEAR MERCADO"):
+        with st.spinner("Analisando notícias globais..."):
+            model = genai.GenerativeModel(MODEL_NAME)
+            res = model.generate_content(f"Gere briefing executivo para {empresa} no setor {setor} sobre {tags_s}.")
+            st.markdown(res.text)
 
 # --- TELA: ANALISTA DE ATAS ---
 elif "📝 Analista de Atas" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>📝 Analista de Atas de Governança</h1><p>Formalização ágil de deliberações a partir de notas brutas</p></div>', unsafe_allow_html=True)
-    notas_brutas = st.text_area("Insira as notas brutas da reunião (Participantes, tópicos, deliberações):", height=300)
+    st.markdown('<div class="product-header"><h1>📝 Analista de Atas</h1></div>', unsafe_allow_html=True)
+    notas = st.text_area("Insira as notas brutas da reunião:", height=300)
     if st.button("📝 FORMALIZAR DOCUMENTO"):
-        with st.spinner("IA estruturando ata de diretoria em formato oficial..."):
-            try:
-                model = genai.GenerativeModel(MODEL_NAME)
-                res_ata = model.generate_content(f"Transforme estas notas em uma ata formal de diretoria estruturada: {notas_brutas}")
-                st.markdown(res_ata.text)
-            except Exception as e: st.error(f"Erro na ata: {e}")
+        with st.spinner("Estruturando ata oficial..."):
+            model = genai.GenerativeModel(MODEL_NAME)
+            res = model.generate_content(f"Transforme estas notas em uma ata formal de diretoria: {notas}")
+            st.markdown(res.text)
 
 # --- TELA: INTELIGÊNCIA COMPETITIVA ---
 elif "📈 Inteligência Competitiva" in menu_selecionado:
-    st.markdown('<div class="product-header"><h1>📈 Inteligência Competitiva & Churn</h1><p>Análise estratégica de rivais e proteção de base de clientes</p></div>', unsafe_allow_html=True)
-    t_rival, t_churn = st.tabs(["🔍 Radar de Rivais", "⚠️ Previsão de Perda (Churn)"])
-    
-    with t_rival:
-        nome_rival = st.text_input("Nome da Empresa Concorrente:")
-        if st.button("📡 ANALISAR MOVIMENTAÇÕES DO RIVAL"):
-            with st.spinner("Analisando brechas comerciais e movimentos do mercado..."):
-                try:
-                    model = genai.GenerativeModel(MODEL_NAME)
-                    res_riv = model.generate_content(f"Analise a estratégia recente da empresa {nome_rival} e identifique vulnerabilidades.")
-                    st.markdown(res_riv.text)
-                except Exception as e: st.error(e)
-                
-    with t_churn:
-        feedback_cli = st.text_area("Insira o feedback crítico do cliente ou reclamação:")
-        if st.button("🧠 AVALIAR RISCO DE SAÍDA"):
-            with st.spinner("Analisando sentimento e probabilidade de perda..."):
-                try:
-                    model = genai.GenerativeModel(MODEL_NAME)
-                    res_ch = model.generate_content(f"Com base neste feedback, avalie o risco de churn (0 a 100%) e sugira uma ação de retenção: {feedback_cli}")
-                    st.markdown(res_ch.text)
-                except Exception as e: st.error(e)
+    st.markdown('<div class="product-header"><h1>📈 Inteligência Competitiva & Churn</h1></div>', unsafe_allow_html=True)
+    tab1, tab2 = st.tabs(["🔍 Radar Rival", "⚠️ Churn"])
+    with tab1:
+        rival = st.text_input("Nome do Rival:")
+        if st.button("📡 ANALISAR MOVIMENTAÇÕES"):
+            model = genai.GenerativeModel(MODEL_NAME)
+            res = model.generate_content(f"Analise a estratégia recente da empresa {rival} e identifique vulnerabilidades.")
+            st.markdown(res.text)
+    with tab2:
+        feed = st.text_area("Feedback do cliente:")
+        if st.button("🧠 AVALIAR RISCO"):
+            model = genai.GenerativeModel(MODEL_NAME)
+            res = model.generate_content(f"Avalie o risco de churn (0-100%) e sugira ação de retenção para: {feed}")
+            st.markdown(res.text)
 
-# --- RODAPÉ CORPORATIVO ---
+# --- RODAPÉ ---
 st.markdown("<hr>", unsafe_allow_html=True)
-st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Enterprise Strategic Edition v4.9 (Full Unabridged Code)")
+st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Edição Integral v7.1")
