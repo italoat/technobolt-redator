@@ -137,7 +137,7 @@ elif "📁 Analisador de Documentos" in menu_selecionado:
         if st.button("🔍 ANALISAR E TRADUZIR PARA GESTÃO"):
             with st.spinner("IA processando complexidade técnica e buscando boas práticas..."):
                 try:
-                    model = genai.GenerativeModel("models/gemini-1.5-flash")
+                    model = genai.GenerativeModel("models/gemini-3-flash-preview")
                     conteudo = arquivo.read()
                     
                     prompt_executivo = f"""
@@ -168,7 +168,7 @@ elif "✉️ Gerador de Email" in menu_selecionado:
     formalidade = st.select_slider("Formalidade:", ["Casual", "Cordial", "Executivo", "Rígido"], value="Executivo")
     if st.button("🚀 GERAR E-MAIL"):
         with st.spinner("Redigindo..."):
-            model = genai.GenerativeModel("models/gemini-1.5-flash")
+            model = genai.GenerativeModel("models/gemini-3-flash-preview")
             res = model.generate_content(f"Como {cargo}, escreva para {dest} sobre {obj}. Tom: {formalidade}.")
             st.text_area("Resultado:", res.text, height=400)
 
@@ -180,7 +180,7 @@ elif "🧠 Gerador de Briefing" in menu_selecionado:
     tags = st.multiselect("Radar:", options=st.session_state.tags_disponiveis, default=["Novas Leis"])
     if st.button("⚡ ESCANEAR MERCADO"):
         with st.spinner("Analisando notícias..."):
-            model = genai.GenerativeModel("models/gemini-1.5-flash")
+            model = genai.GenerativeModel("models/gemini-3-flash-preview")
             res = model.generate_content(f"Gere briefing para {empresa} em {setor} sobre {tags}.")
             st.markdown(res.text)
 
@@ -190,7 +190,7 @@ elif "📝 Analista de Atas" in menu_selecionado:
     notas = st.text_area("Notas da reunião:", height=250)
     if st.button("📝 FORMALIZAR ATA"):
         with st.spinner("Formatando..."):
-            model = genai.GenerativeModel("models/gemini-1.5-flash")
+            model = genai.GenerativeModel("models/gemini-3-flash-preview")
             res = model.generate_content(f"Transforme em ata formal: {notas}")
             st.markdown(res.text)
 
@@ -201,13 +201,13 @@ elif "📈 Inteligência Competitiva" in menu_selecionado:
     with aba1:
         rival = st.text_input("Nome do Rival:")
         if st.button("📡 ANALISAR RIVAL"):
-            model = genai.GenerativeModel("models/gemini-1.5-flash")
+            model = genai.GenerativeModel("models/gemini-3-flash-preview")
             res = model.generate_content(f"Analise a estratégia da {rival} e aponte brechas.")
             st.markdown(res.text)
     with aba2:
         fb = st.text_area("Feedback do Cliente:")
         if st.button("🧠 PREVER RISCO"):
-            model = genai.GenerativeModel("models/gemini-1.5-flash")
+            model = genai.GenerativeModel("models/gemini-3-flash-preview")
             res = model.generate_content(f"Analise o risco de perda baseado neste texto: {fb}")
             st.markdown(res.text)
 
