@@ -17,72 +17,73 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
 
-    /* FUNDO PRETO GLOBAL ABSOLUTO */
+    /* 1. FUNDO PRETO GLOBAL ABSOLUTO */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], 
     .stApp, [data-testid="stMain"], [data-testid="stVerticalBlock"],
-    [data-testid="stMarkdownContainer"], .main, [data-testid="stBlock"],
-    div[role="dialog"], div[data-baseweb="popover"], [data-testid="stExpander"] {
+    [data-testid="stMarkdownContainer"], .main, [data-testid="stBlock"] {
         background-color: #05070a !important;
         font-family: 'Inter', sans-serif !important;
+        color: #ffffff !important;
     }
 
-    /* REMOÇÃO DE ELEMENTOS NATIVOS */
+    /* 2. REMOÇÃO DE ELEMENTOS NATIVOS */
     [data-testid="stSidebar"] { display: none !important; }
     header { visibility: hidden !important; }
     footer { visibility: hidden !important; }
 
-    /* FORÇA FONTES BRANCAS EM TUDO */
+    /* 3. FORÇA FONTES BRANCAS EM TUDO (MESMO DENTRO DE COMPONENTES) */
     * { 
         color: #f8fafc !important; 
         -webkit-text-fill-color: #f8fafc !important;
     }
 
-    /* BARRA DE SELEÇÃO (SELECTBOX) - REMOVE O BRANCO */
-    div[data-baseweb="select"] > div, 
+    /* 4. TÍTULO CORPORATIVO COM GRADIENTE */
+    .main-title { 
+        font-size: 48px; font-weight: 900; text-align: center; 
+        background: linear-gradient(to right, #60a5fa, #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent !important;
+        letter-spacing: -2px; margin-bottom: 5px;
+    }
+
+    .product-header { 
+        background: rgba(30, 41, 59, 0.4); 
+        backdrop-filter: blur(12px);
+        padding: 40px; border-radius: 24px; margin-bottom: 35px; 
+        text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* 5. CORREÇÃO "NUCLEAR" DA BARRA DE SERVIÇOS (SELECTBOX) E POPOVER */
+    /* Fundo da barra fechada */
+    div[data-baseweb="select"] > div {
+        background-color: #161b22 !important;
+        border-radius: 12px !important;
+    }
+
+    /* Fundo da barra e da lista flutuante aberta */
     div[data-baseweb="select"], 
     div[data-baseweb="popover"], 
-    ul[role="listbox"],
-    div[data-baseweb="popover"] * {
+    div[data-baseweb="popover"] > div,
+    ul[role="listbox"], 
+    [data-baseweb="listbox"] {
         background-color: #161b22 !important;
+        color: #ffffff !important;
         border: 1px solid #30363d !important;
-        color: #ffffff !important;
     }
     
-    /* Hover na lista suspensa */
-    li[role="option"]:hover {
+    /* Itens individuais da lista suspensa */
+    li[role="option"] {
+        background-color: #161b22 !important;
+        color: #ffffff !important;
+        transition: 0.2s;
+    }
+    
+    li[role="option"]:hover, li[aria-selected="true"] {
         background-color: #1d4ed8 !important;
-    }
-
-    /* BOTÕES - VERDE VIBRANTE SEM PRETO OU SOMBRAS DEFORMADAS */
-    .stButton > button { 
-        width: 100%; border-radius: 14px; height: 4.5em; font-weight: 700; 
-        background-color: #10b981 !important; 
-        color: #ffffff !important; 
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important; 
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        transition: 0.3s all ease;
-    }
-    
-    .stButton > button:hover, .stButton > button:focus, .stButton > button:active {
-        background-color: #059669 !important;
         color: #ffffff !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4) !important;
     }
 
-    /* BOTÃO "BROWSE FILES" - AZUL CORPORATIVO */
-    [data-testid="stFileUploader"] button {
-        background-color: #3b82f6 !important;
-        color: #ffffff !important;
-        border: none !important;
-        border-radius: 10px !important;
-    }
-
-    /* INPUTS E TEXTAREAS - CINZA ESCURO */
+    /* 6. INPUTS E TEXTAREAS (CINZA ESCURO #161b22) */
     .stTextInput input, .stTextArea textarea {
         background-color: #161b22 !important;
         color: #ffffff !important;
@@ -91,22 +92,48 @@ st.markdown("""
         padding: 15px !important;
     }
 
-    /* HEADER COM GRADIENTE */
-    .main-title { 
-        font-size: 42px; font-weight: 900; text-align: center; 
-        background: linear-gradient(to right, #60a5fa, #a855f7);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent !important;
+    /* 7. BOTÃO "BROWSE FILES" E ÁREA DE UPLOAD */
+    [data-testid="stFileUploader"] section {
+        background-color: #161b22 !important;
+        border: 2px dashed #3b82f6 !important;
+        border-radius: 15px !important;
     }
     
-    .product-header { 
-        background: rgba(30, 41, 59, 0.4); 
-        backdrop-filter: blur(12px);
-        padding: 40px; border-radius: 24px; margin-bottom: 35px; 
-        text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
+    [data-testid="stFileUploader"] button {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 10px 25px !important;
+        font-weight: 700 !important;
     }
 
-    hr { border: 0.5px solid rgba(255, 255, 255, 0.1) !important; margin: 30px 0; }
+    /* 8. BOTÕES EXECUTIVOS (VERDE VIBRANTE SEM FAIXA PRETA) */
+    .stButton > button { 
+        width: 100%; border-radius: 14px; height: 4.5em; font-weight: 700; 
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2) !important;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+    
+    .stButton > button:hover, .stButton > button:focus, .stButton > button:active {
+        background-color: #2ea043 !important;
+        color: #ffffff !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4) !important;
+        transform: translateY(-2px);
+    }
+
+    /* 9. SLIDER DE FORMALIDADE E TABS */
+    .stSlider label, .stSlider span { color: #ffffff !important; }
+    .stTabs [data-baseweb="tab-list"] { background-color: transparent !important; }
+    .stTabs [data-baseweb="tab"] { color: #ffffff !important; font-weight: 700; }
+
+    hr { border: 0.5px solid rgba(255, 255, 255, 0.1) !important; margin: 40px 0; }
 </style>
 """, unsafe_allow_html=True)
 
