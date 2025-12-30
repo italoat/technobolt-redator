@@ -53,15 +53,31 @@ st.markdown("""
         text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* 5. CORREÇÃO DAS BARRAS (CINZA ESCURO #161b22) */
-    div[data-baseweb="select"] > div, div[data-baseweb="select"], 
-    div[data-baseweb="popover"], div[data-baseweb="popover"] > div,
-    ul[role="listbox"], [data-baseweb="listbox"] {
+    /* 5. CORREÇÃO "NUCLEAR" DA BARRA DE SERVIÇOS (SELECTBOX) E POPOVER */
+    /* Fundo da barra fechada */
+    div[data-baseweb="select"] > div {
+        background-color: #161b22 !important;
+        border-radius: 12px !important;
+    }
+
+    /* Fundo da barra e da lista flutuante aberta */
+    div[data-baseweb="select"], 
+    div[data-baseweb="popover"], 
+    div[data-baseweb="popover"] > div,
+    ul[role="listbox"], 
+    [data-baseweb="listbox"] {
         background-color: #161b22 !important;
         color: #ffffff !important;
         border: 1px solid #30363d !important;
     }
-
+    
+    /* Itens individuais da lista suspensa */
+    li[role="option"] {
+        background-color: #161b22 !important;
+        color: #ffffff !important;
+        transition: 0.2s;
+    }
+    
     li[role="option"]:hover, li[aria-selected="true"] {
         background-color: #1d4ed8 !important;
         color: #ffffff !important;
