@@ -257,7 +257,7 @@ elif "📁 Analisador de Documentos" in menu_selecionado:
         with st.spinner("IA processando dados técnicos..."):
             if arquivo.type == "application/pdf":
                 dados = [{"mime_type": "application/pdf", "data": arquivo.read()}]
-                prompt_doc = "Aja como Consultor McKinsey. Gere: Resumo Executivo, Impacto (Risco/Custo) e Plano de Ação."
+                prompt_doc = "Aja como Consultor McKinsey. Gere: Resumo Executivo, Impacto (Risco/Custo) e Plano de Ação.(Contudo o nome da sua consultoria é Technobolt)"
             else:
                 texto_raw = extrair_texto_docx(arquivo) if arquivo.name.endswith('docx') else arquivo.read().decode()
                 dados = [texto_raw]
@@ -266,7 +266,7 @@ elif "📁 Analisador de Documentos" in menu_selecionado:
             res_doc, mod_doc = call_ai_with_failover(prompt_doc, dados)
             st.markdown(f'<span class="model-badge">Motor Ativo: {mod_doc}</span>', unsafe_allow_html=True)
             st.markdown(res_doc)
-            st.download_button("📄 Baixar Relatório McKinsey", data=gerar_docx("Análise Estratégica", res_doc), file_name="Relatorio_McKinsey.docx")
+            st.download_button("📄 Baixar Relatório", data=gerar_docx("Análise Estratégica", res_doc), file_name="Relatorio.docx")
 
 # GERADOR DE EMAIL INDIVIDUAL
 elif "✉️ Gerador de Email" in menu_selecionado:
