@@ -177,20 +177,36 @@ def extrair_texto_docx(arquivo_docx):
     return "\n".join([p.text for p in doc.paragraphs])
 
 def call_ai_with_failover(prompt, content_list=None):
-    """Executa o prompt tentando a lista de modelos em cascata."""
+    """Executa o prompt com instrução de sistema para remover saudações."""
+    # Instrução Mestre: Proíbe introduções e comentários da IA
+    sys_instr = (
+        "Você é o motor de inteligência da TechnoBolt Solutions. "
+        "Sua saída deve ser estritamente profissional e técnica. "
+        "PROIBIDO: Usar frases como 'Aqui está', 'Entendido', 'Como solicitado' ou saudações. "
+        "ENTREGA: Responda diretamente com o conteúdo estruturado em Markdown."
+    )
+    
     for model_id in MODEL_LIST:
         try:
-            model = genai.GenerativeModel(model_id)
+            # Note: Alguns modelos suportam system_instruction no construtor
+            model = genai.GenerativeModel(model_id, system_instruction=sys_instr)
             if content_list:
                 response = model.generate_content([prompt] + content_list)
             else:
                 response = model.generate_content(prompt)
             return response.text, model_id
         except Exception as e:
-            if "429" in str(e): # Se erro for cota excedida, pula para o próximo
+            if "429" in str(e):
                 continue
-            return f"Erro técnico no motor {model_id}: {e}", "Falha"
-    return "⚠️ Cota esgotada em todos os modelos Flash da sua API Key.", "Esgotado"
+            # Fallback para modelos que não suportam system_instruction (versões antigas)
+            try:
+                model_fb = genai.GenerativeModel(model_id)
+                full_prompt = f"{sys_instr}\n\nSOLICITAÇÃO: {prompt}"
+                response = model_fb.generate_content([full_prompt] + content_list if content_list else full_prompt)
+                return response.text, model_id
+            except:
+                continue
+    return "⚠️ Cota esgotada.", "Esgotado"
 
 # --- ADIÇÃO: FUNÇÃO DE EXPORTAÇÃO ---
 def gerar_docx(titulo, conteudo):
