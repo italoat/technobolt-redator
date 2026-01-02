@@ -196,7 +196,7 @@ def call_ai_with_failover(prompt, content_list=None):
 def gerar_docx(titulo, conteudo):
     doc = docx.Document()
     doc.add_heading(titulo, 0)
-    doc.add_paragraph(f"TechnoBolt IA - Relatório Gerado em: {time.strftime('%d/%m/%Y %H:%M')}")
+    doc.add_paragraph(f"TechnoBolt Solutions - Relatório Gerado em: {time.strftime('%d/%m/%Y %H:%M')}")
     doc.add_paragraph("-" * 30)
     doc.add_paragraph(conteudo)
     buffer = BytesIO()
@@ -214,7 +214,8 @@ menu_opcoes = [
     "✉️ Gerador de Email Inteligente", 
     "🧠 Briefing Negocial Estratégico", 
     "📝 Analista de Atas de Governança",
-    "📈 Inteligência Competitiva & Churn"
+    "📈 Inteligência Competitiva & Churn",
+    "📊 Relatório Master de Governança"
 ]
 menu_selecionado = st.selectbox("Navegação", menu_opcoes, label_visibility="collapsed")
 st.markdown("<hr>", unsafe_allow_html=True)
@@ -330,6 +331,21 @@ elif "📈 Inteligência Competitiva" in menu_selecionado:
             st.markdown(f'<span class="model-badge">Motor: {mod}</span>', unsafe_allow_html=True)
             st.markdown(res)
             st.download_button("⚠️ Baixar Análise de Churn", data=gerar_docx("Análise de Risco", res), file_name="Analise_Churn.docx")
+
+# NOVO MÓDULO: RELATÓRIO MASTER DE GOVERNANÇA (ESTRUTURA INTEGRADA)
+elif "📊 Relatório Master" in menu_selecionado:
+    st.markdown('<div class="product-header"><h1>📊 Relatório Master de Governança</h1></div>', unsafe_allow_html=True)
+    st.write("Consolide todas as análises, e-mails e reuniões da semana em um dossiê executivo para o cliente.")
+    compilado = st.text_area("Cole aqui todos os resumos e notas da semana:", height=400, placeholder="Ex: Resumo dos e-mails de segunda, Ata de quarta, Briefing de mercado...")
+    if st.button("🚀 GERAR DOSSIÊ SEMANAL"):
+        if compilado:
+            with st.spinner("IA TechnoBolt estruturando governança semanal..."):
+                prompt_master = f"Aja como um Chief of Staff da TechnoBolt Solutions. Organize os seguintes dados em um Relatório Semanal de Governança Profissional estruturado em: 1. RESUMO EXECUTIVO, 2. DECISÕES TOMADAS, 3. RISCOS E ALERTAS e 4. PRÓXIMOS PASSOS. Dados: {compilado}"
+                res_master, mod_master = call_ai_with_failover(prompt_master)
+                st.markdown(res_master)
+                st.download_button("📊 Baixar Relatório Master (.docx)", data=gerar_docx("Relatório Semanal de Governança", res_master), file_name=f"Governanca_Semanal_{time.strftime('%d_%m')}.docx")
+        else:
+            st.warning("Por favor, insira o conteúdo compilado da semana.")
 
 # --- RODAPÉ ---
 st.markdown("<hr>", unsafe_allow_html=True)
