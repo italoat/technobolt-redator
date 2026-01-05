@@ -166,7 +166,7 @@ def render_auth():
         st.markdown("<h1 class='hero-title'>TECHNOBOLT HUB</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align:center; color:#64748b; margin-bottom:40px; letter-spacing:1px;'>TERMINAL DE GOVERNANÇA COGNITIVA</p>", unsafe_allow_html=True)
         
-        user_id = st.text_input("Credencial Identificadora", placeholder="Ex: jackson.antonio")
+        user_id = st.text_input("Credencial Identificadora", placeholder="Usuário")
         user_key = st.text_input("Chave de Segurança", type="password", placeholder="••••••••")
         
         if st.button("AUTENTICAR NO HUB"):
@@ -367,41 +367,29 @@ elif "📊 Relatório Master" in escolha:
             st.markdown(res_master)
             st.download_button("📥 Baixar Dossiê", data=export_docx("Relatório Master", res_master), file_name="Master_Dossie.docx")
 
-# --- 8. CHATBOT POPUP (AGENTE VIRTUAL CORRIGIDO) ---
+# --- 8. CHATBOT POPUP (O BALÃO DE FALA DENTRO DO POPUP) ---
+if st.button("💬", key="trigger_chat"): st.session_state.chat_open = not st.session_state.chat_open
 
-
-
-st.markdown("""
-    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 10001;">
-        <button style="background:#1e40af; border:none; width:65px; height:65px; border-radius:50%; box-shadow: 0 10px 30px rgba(30,64,175,0.2); color:white; font-size:28px; cursor:pointer;">💡</button>
-    </div>
-""", unsafe_allow_html=True)
-
-with st.container():
-    col_v, col_chat = st.columns([4, 1.4])
-    with col_chat:
-        if st.checkbox("Agente Virtual", key="chat_pop_v7"):
-            st.markdown('<div class="chat-popup"><div class="chat-header">Hub de Soluções</div>', unsafe_allow_html=True)
-            st.markdown('<div class="chat-content">', unsafe_allow_html=True)
-            
-            # Lógica de Menu dentro do Chat
-            if st.session_state.chat_step == "menu":
-                st.markdown('<div class="chat-bubble-agent">Olá! Sou seu assistente TechnoBolt. Qual solução você deseja entender em detalhes agora?</div>', unsafe_allow_html=True)
-                for item in menu_navegacao:
-                    if st.button(f"Saber mais: {item}", key=f"btn_chat_{item}"):
-                        with st.spinner("IA Processando..."):
-                            st.session_state.chat_response, _ = call_technobolt_ai(f"Explique o valor corporativo e como usar o módulo: {item}", onboarding=True)
-                            st.session_state.chat_step = "response"
-                            st.rerun()
-            
-            # Lógica de Resposta e Conversa
-            if st.session_state.chat_step == "response":
-                st.markdown(f'<div class="chat-bubble-agent">{st.session_state.chat_response}</div>', unsafe_allow_html=True)
-                if st.button("Voltar ao Menu Principal"):
-                    st.session_state.chat_step = "menu"
+if st.session_state.chat_open:
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    st.markdown('<div class="chat-header">Hub de Soluções</div>', unsafe_allow_html=True)
+    
+    with st.container():
+        st.markdown('<div style="padding:15px; height:380px; overflow-y:auto;">', unsafe_allow_html=True)
+        if st.session_state.chat_step == "menu":
+            st.markdown('<div class="agent-msg">Olá! Qual solução você deseja explorar agora?</div>', unsafe_allow_html=True)
+            for item in menu_nav:
+                if st.button(f"Saber mais: {item}", key=f"chat_{item}"):
+                    st.session_state.chat_response, _ = call_ai_technobolt(f"Explique o valor do módulo {item}", onboarding=True)
+                    st.session_state.chat_step = "response"
                     st.rerun()
-            
-            st.markdown('</div></div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="agent-msg">{st.session_state.chat_response}</div>', unsafe_allow_html=True)
+            if st.button("Voltar ao Menu"):
+                st.session_state.chat_step = "menu"
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 9. RODAPÉ DE GOVERNANÇA ---
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
