@@ -87,23 +87,37 @@ st.markdown("""
     li[role="option"]:hover { background-color: #1e40af !important; }
 
     /* BOTÕES EXECUTIVOS */
-    .stButton > button { 
-        width: 100%; 
-        border-radius: 14px; 
-        height: 4.2em; 
-        font-weight: 700; 
-        background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%) !important; 
-        color: #ffffff !important; 
-        border: none !important;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+   .stButton > button { 
+    width: 100%; 
+    border-radius: 14px; 
+    height: 4.2em; 
+    font-weight: 700; 
+    background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%) !important; 
+    color: #ffffff !important; 
+    border: none !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .stButton > button:hover {
-        transform: scale(1.03);
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.6) !important;
-    }
+.stButton > button div[data-testid="stMarkdownContainer"], 
+.stButton > button p {
+    background: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.stButton > button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5) !important;
+    color: #ffffff !important;
+}
 
     /* BADGE DE STATUS */
     .model-badge {
