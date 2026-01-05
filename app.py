@@ -13,12 +13,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. CSS ULTRA-PREMIUM (ESTÉTICA TECH INTEGRADA) ---
+# --- 2. CSS ULTRA-PREMIUM (ESTÉTICA IA ASSISTANT & ZERO WHITE) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
 
-    /* 1. FUNDO PRETO GLOBAL ABSOLUTO */
+    /* FUNDO ABSOLUTO SEM MANCHAS BRANCAS */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], 
     .stApp, [data-testid="stMain"], [data-testid="stVerticalBlock"],
     [data-testid="stMarkdownContainer"], .main, [data-testid="stBlock"] {
@@ -32,93 +32,102 @@ st.markdown("""
     header { visibility: hidden !important; }
     footer { visibility: hidden !important; }
 
-    /* FORÇAR TEXTO CLARO */
+    /* FORÇAR TEXTO CLARO EM TUDO */
     * { color: #f8fafc !important; }
 
-    /* 2. CARD DE LOGIN GLASSMORPHISM */
+    /* CARD DE LOGIN CENTRALIZADO E GLASSMORPHISM */
     .login-card {
-        background: rgba(15, 23, 42, 0.75);
+        background: rgba(15, 23, 42, 0.85);
         backdrop-filter: blur(25px);
-        padding: 50px;
+        padding: 55px;
         border-radius: 35px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
         text-align: center;
+        margin: auto;
+        max-width: 450px;
     }
 
-    /* 3. TÍTULOS E TEXTOS */
+    /* TÍTULOS COM GRADIENTE TECH */
     .main-title { 
-        font-size: 56px; font-weight: 800; text-align: center; 
+        font-size: 58px; font-weight: 800; text-align: center; 
         background: linear-gradient(135deg, #3b82f6, #6366f1, #d4af37);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent !important;
         letter-spacing: -3px; margin-bottom: 5px;
-        padding: 20px 0;
+        padding: 15px 0;
     }
 
     .product-header { 
-        background: rgba(15, 23, 42, 0.6); 
-        backdrop-filter: blur(15px);
-        padding: 45px; border-radius: 28px; margin-bottom: 35px; 
-        text-align: center; border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        background: rgba(15, 23, 42, 0.7); 
+        backdrop-filter: blur(20px);
+        padding: 45px; border-radius: 30px; margin-bottom: 35px; 
+        text-align: center; border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
     }
 
-    /* 4. INPUTS MODERNOS */
+    /* CORREÇÃO NUCLEAR DA LISTA SUSPENSA (SELECTBOX) - REMOVE O BRANCO */
+    div[data-baseweb="select"] > div, 
+    div[data-baseweb="popover"], 
+    div[data-baseweb="popover"] > div,
+    ul[role="listbox"], 
+    [data-baseweb="listbox"] {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        border: 1px solid #1e293b !important;
+    }
+    
+    li[role="option"] {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        transition: 0.2s ease;
+    }
+    
+    li[role="option"]:hover, li[aria-selected="true"] {
+        background-color: #1d4ed8 !important;
+        color: #ffffff !important;
+    }
+
+    /* INPUTS MODERNOS CINZA ESPACIAL */
     .stTextInput input, .stTextArea textarea {
-        background-color: rgba(10, 15, 25, 0.8) !important;
+        background-color: rgba(15, 23, 42, 0.9) !important;
         color: #ffffff !important;
         border: 1px solid #1e293b !important;
         border-radius: 14px !important;
-        padding: 15px !important;
-        transition: all 0.3s ease;
-    }
-    
-    .stTextInput input:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+        padding: 18px !important;
     }
 
-    /* 5. BOTÕES COM EFEITO TECH */
+    /* BOTÃO COM EFEITO TECH E ELEVAÇÃO */
     .stButton > button { 
         width: 100%; 
-        border-radius: 14px; 
-        height: 4em; 
+        border-radius: 16px; 
+        height: 4.5em; 
         font-weight: 700; 
         background: linear-gradient(135deg, #1e3a8a 0%, #0ea5e9 100%) !important; 
         color: #ffffff !important; 
         border: none !important;
         text-transform: uppercase;
         letter-spacing: 2px;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.4) !important;
-        filter: brightness(1.2);
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(14, 165, 233, 0.4) !important;
     }
 
-    /* 6. SELECTBOX CUSTOMIZADO */
-    div[data-baseweb="select"] > div {
-        background-color: #0f172a !important;
-        border: 1px solid #1e293b !important;
-        border-radius: 14px !important;
-    }
-
-    /* 7. BADGE DE MODELO */
+    /* BADGE DE STATUS */
     .model-badge {
         background: rgba(16, 185, 129, 0.1);
         color: #10b981 !important;
-        padding: 6px 16px;
+        padding: 8px 18px;
         border-radius: 30px;
         border: 1px solid rgba(16, 185, 129, 0.5);
         font-size: 11px;
         font-weight: 800;
-        letter-spacing: 1px;
     }
 
-    hr { border: 0.5px solid rgba(255, 255, 255, 0.05) !important; margin: 40px 0; }
+    hr { border: 0.5px solid rgba(255, 255, 255, 0.08) !important; margin: 40px 0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -128,23 +137,23 @@ if 'logged_in' not in st.session_state:
 
 def tela_login():
     st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1.5, 1])
+    col1, col2, col3 = st.columns([1, 1.6, 1])
     
     with col2:
         st.markdown("""
             <div class='login-card'>
-                <h1 style='font-size: 42px; font-weight: 800; margin-bottom: 5px; background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+                <h1 style='font-size: 44px; font-weight: 800; margin-bottom: 5px; background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
                     TechnoBolt IA
                 </h1>
-                <p style='color: #64748b; font-size: 15px; margin-bottom: 35px; letter-spacing: 1px;'>SISTEMA DE GOVERNANÇA COGNITIVA</p>
+                <p style='color: #64748b; font-size: 16px; margin-bottom: 40px; letter-spacing: 1px;'>HUB DE GOVERNANÇA COGNITIVA</p>
             </div>
         """, unsafe_allow_html=True)
         
         with st.container():
-            u_in = st.text_input("Identificador de Acesso", placeholder="Usuário", label_visibility="collapsed")
+            u_in = st.text_input("Identificador de Usuário", placeholder="Usuário", label_visibility="collapsed")
             p_in = st.text_input("Chave de Segurança", type="password", placeholder="Senha", label_visibility="collapsed")
             
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
             
             if st.button("AUTENTICAR NO HUB"):
                 usuarios = {
@@ -158,9 +167,9 @@ def tela_login():
                     st.session_state.user_atual = u_in
                     st.rerun()
                 else:
-                    st.error("⚠️ Falha na autenticação. Verifique suas credenciais.")
+                    st.error("⚠️ Identidade não verificada pelo protocolo de segurança.")
         
-        st.markdown("<p style='text-align: center; color: #334155; font-size: 11px; margin-top: 30px; letter-spacing: 2px;'>PROTOCOLO DE SEGURANÇA ATIVO</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #334155; font-size: 11px; margin-top: 40px; letter-spacing: 2px;'>PROTEÇÃO DE DADOS AES-256 ATIVA</p>", unsafe_allow_html=True)
 
 if not st.session_state.logged_in:
     tela_login()
@@ -184,7 +193,7 @@ def extrair_texto_docx(arquivo_docx):
     return "\n".join([p.text for p in doc.paragraphs])
 
 def call_ai_with_failover(prompt, content_list=None):
-    """Lógica robusta de redundância de modelos."""
+    """Lógica robusta de redundância com instruções de sistema TechnoBolt."""
     sys_instr = (
         "Você é o motor de inteligência da TechnoBolt Solutions. "
         "Sua saída deve ser estritamente profissional e técnica. "
@@ -210,14 +219,14 @@ def call_ai_with_failover(prompt, content_list=None):
                 return response.text, model_id
             except:
                 continue
-    return "⚠️ Erro Crítico: Todos os motores de IA estão indisponíveis no momento.", "Esgotado"
+    return "⚠️ Erro: Todos os modelos de redundância esgotaram a cota.", "Esgotado"
 
 def gerar_docx(titulo, conteudo):
     doc = docx.Document()
     doc.add_heading(titulo, 0)
     doc.add_paragraph(f"TechnoBolt Solutions - Hub de Governança")
     doc.add_paragraph(f"Operador Responsável: {st.session_state.user_atual}")
-    doc.add_paragraph(f"Data da Extração: {time.strftime('%d/%m/%Y %H:%M')}")
+    doc.add_paragraph(f"Data de Geração: {time.strftime('%d/%m/%Y %H:%M')}")
     doc.add_paragraph("-" * 35)
     doc.add_paragraph(conteudo)
     buffer = BytesIO()
@@ -226,7 +235,7 @@ def gerar_docx(titulo, conteudo):
     return buffer
 
 # --- 5. INTERFACE DO HUB (NAVEGAÇÃO COMPLETA) ---
-st.markdown(f'<div style="text-align:right; font-size:11px; color:#60a5fa; letter-spacing:1px;">ID SESSÃO: {st.session_state.user_atual.upper()} | <a href="/" style="color:#f87171; text-decoration:none;">[ ENCERRAR ]</a></div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align:right; font-size:11px; color:#60a5fa; letter-spacing:1px;">ID SESSÃO: {st.session_state.user_atual.upper()} | <a href="/" style="color:#f87171; text-decoration:none;">[ SAIR ]</a></div>', unsafe_allow_html=True)
 st.markdown('<div class="main-title">TechnoBolt IA Hub</div>', unsafe_allow_html=True)
 
 menu_opcoes = [
@@ -244,7 +253,6 @@ st.markdown("<hr>", unsafe_allow_html=True)
 
 # --- 6. TELAS DO HUB (CONTEÚDO INTEGRAL) ---
 
-# DASHBOARD
 if "🏠 Dashboard Inicial" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>Centro de Comando Corporativo</h1><p>Monitoria Cognitiva e Governança em Tempo Real</p></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
@@ -253,7 +261,6 @@ if "🏠 Dashboard Inicial" in menu_selecionado:
     with c3: st.metric("Protocolo de Dados", "AES-256", delta="Criptografado")
     st.info("Ecossistema TechnoBolt operando normalmente. Selecione uma solução técnica acima para iniciar a auditoria.")
 
-# EMAIL INTEL (AUDITORIA EM LOTE)
 elif "📧 Email Intel" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📧 Email Intel: Auditoria & Resposta</h1></div>', unsafe_allow_html=True)
     col_u, col_r = st.columns([1, 2])
@@ -262,7 +269,6 @@ elif "📧 Email Intel" in menu_selecionado:
         cargo = st.text_input("Cargo para Rascunho:", value="Diretor de Operações")
         tom = st.selectbox("Tom da Comunicação:", ["Executivo/Direto", "Diplomático", "Cordial", "Firme"])
         btn_audit = st.button("🔍 EXECUTAR AUDITORIA EM LOTE")
-    
     with col_r:
         if arquivos and btn_audit:
             for i, pdf in enumerate(arquivos):
@@ -275,7 +281,6 @@ elif "📧 Email Intel" in menu_selecionado:
                         st.markdown(res_texto)
                         st.download_button(f"📩 Baixar Auditoria {i+1}", data=gerar_docx(f"Auditoria: {pdf.name}", res_texto), file_name=f"Auditoria_{pdf.name}.docx")
 
-# ANALISADOR DE DOCUMENTOS
 elif "📁 Analisador de Documentos" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📁 Analisador de Documentos & Contratos</h1></div>', unsafe_allow_html=True)
     arquivo = st.file_uploader("Upload (PDF, DOCX, TXT):", type=["pdf", "docx", "txt"])
@@ -288,13 +293,11 @@ elif "📁 Analisador de Documentos" in menu_selecionado:
                 texto_raw = extrair_texto_docx(arquivo) if arquivo.name.endswith('docx') else arquivo.read().decode()
                 dados = [texto_raw]
                 prompt_doc = "Analise o texto a seguir sob a ótica de negócios para a Technobolt Solutions:"
-            
             res_doc, mod_doc = call_ai_with_failover(prompt_doc, dados)
             st.markdown(f'<span class="model-badge">SISTEMA ATIVO: {mod_doc}</span>', unsafe_allow_html=True)
             st.markdown(res_doc)
             st.download_button("📄 Baixar Relatório Completo", data=gerar_docx("Análise Estratégica", res_doc), file_name="Relatorio_TechnoBolt.docx")
 
-# GERADOR DE EMAIL
 elif "✉️ Gerador de Email" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>✉️ Gerador de Email Inteligente</h1></div>', unsafe_allow_html=True)
     c_e = st.text_input("Seu Cargo:")
@@ -306,14 +309,12 @@ elif "✉️ Gerador de Email" in menu_selecionado:
         st.text_area("Rascunho Gerado:", res, height=400)
         st.download_button("✉️ Baixar Rascunho (.docx)", data=gerar_docx("Rascunho de Email", res), file_name="Rascunho_Email.docx")
 
-# BRIEFING NEGOCIAL
 elif "🧠 Briefing Negocial" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>🧠 Briefing Negocial Estratégico</h1></div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1: emp_a = st.text_input("Empresa Alvo:")
     with col2: set_a = st.text_input("Setor de Atuação:")
     objetivo_b = st.text_area("Foco do Briefing (Fusão, Risco, Mercado):")
-    
     if st.button("⚡ ESCANEAR MERCADO"):
         if emp_a:
             with st.spinner(f"Gerando inteligência para {emp_a}..."):
@@ -325,7 +326,6 @@ elif "🧠 Briefing Negocial" in menu_selecionado:
         else:
             st.warning("Informe a empresa alvo para processamento.")
 
-# ANALISTA DE ATAS
 elif "📝 Analista de Atas" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📝 Analista de Atas de Governança</h1></div>', unsafe_allow_html=True)
     notas_r = st.text_area("Insira as notas ou transcrição da reunião:", height=300)
@@ -336,7 +336,6 @@ elif "📝 Analista de Atas" in menu_selecionado:
             st.markdown(res)
             st.download_button("📝 Baixar Ata Formal", data=gerar_docx("Ata de Governança", res), file_name="Ata_Oficial.docx")
 
-# INTELIGÊNCIA COMPETITIVA
 elif "📈 Inteligência Competitiva" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📈 Inteligência Competitiva & Churn</h1></div>', unsafe_allow_html=True)
     tab1, tab2 = st.tabs(["🔍 Monitoria de Concorrentes", "⚠️ Análise de Churn"])
@@ -353,7 +352,6 @@ elif "📈 Inteligência Competitiva" in menu_selecionado:
             st.markdown(res)
             st.download_button("⚠️ Baixar Plano de Retenção", data=gerar_docx("Plano de Retenção", res), file_name="Analise_Churn.docx")
 
-# RELATÓRIO MASTER
 elif "📊 Relatório Master" in menu_selecionado:
     st.markdown('<div class="product-header"><h1>📊 Relatório Master de Governança</h1></div>', unsafe_allow_html=True)
     compilado_s = st.text_area("Cole os dados acumulados da semana para consolidação executiva:", height=400)
@@ -370,4 +368,4 @@ elif "📊 Relatório Master" in menu_selecionado:
 
 # --- RODAPÉ ---
 st.markdown("<hr>", unsafe_allow_html=True)
-st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Master Resilience Edition v1.0 | Operador: {st.session_state.user_atual.upper()}")
+st.caption(f"TechnoBolt IA Hub © {time.strftime('%Y')} | Master Edition v1.0 | Operador: {st.session_state.user_atual.upper()}")
