@@ -4,22 +4,27 @@ import os
 import time
 import docx  # Requer: pip install python-docx
 from io import BytesIO
+import base64
 
-# --- 1. CONFIGURAÇÃO DE SEGURANÇA E PROTOCOLO ---
+# --- 1. CONFIGURAÇÃO DE SEGURANÇA E PROTOCOLO (ELITE HUB) ---
 st.set_page_config(
-    page_title="TechnoBolt IA - Elite Hub",
+    page_title="TechnoBolt IA - Elite Hub de Governança",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. GESTÃO DE ESTADO (PERSISTÊNCIA DE SESSÃO) ---
+# --- 2. GESTÃO DE ESTADO (PERSISTÊNCIA E CHAT) ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'user_atual' not in st.session_state:
     st.session_state.user_atual = None
-if 'chat_active' not in st.session_state:
-    st.session_state.chat_active = False
+if 'chat_step' not in st.session_state:
+    st.session_state.chat_step = "menu"
+if 'chat_response' not in st.session_state:
+    st.session_state.chat_response = ""
+if 'analise_count' not in st.session_state:
+    st.session_state.analise_count = 0
 
 def protocol_logout():
     """Finaliza a sessão e limpa os estados de segurança do operador."""
@@ -50,6 +55,12 @@ st.markdown("""
         padding: 45px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
         margin-bottom: 30px;
+        animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .hero-title {
@@ -61,13 +72,13 @@ st.markdown("""
         margin-bottom: 10px;
     }
 
-    /* CORREÇÃO DEFINITIVA DA LISTA SUSPENSA (SELECTBOX) */
+    /* CORREÇÃO DA LISTA SUSPENSA (SELECTBOX) */
     .stSelectbox [data-baseweb="select"] {
         width: 100% !important;
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        padding: 8px !important;
+        padding: 10px !important;
         min-height: 50px !important;
     }
     
@@ -107,85 +118,78 @@ st.markdown("""
         padding: 0 !important; text-shadow: none !important;
     }
 
-    /* BOTÃO DE SAIR (DESIGN CLEAN E DISCRETO) */
+    /* BOTÃO DE SAIR (DESIGN CLEAN) */
     .logout-zone .stButton > button {
         background: transparent !important;
         color: #ef4444 !important;
         border: 1px solid #fee2e2 !important;
-        height: 2.8em !important;
+        height: 3em !important;
         width: auto !important;
-        padding: 0 25px !important;
+        padding: 0 30px !important;
         text-transform: none !important;
         font-size: 14px !important;
         letter-spacing: 0 !important;
         font-weight: 600 !important;
     }
-    .logout-zone .stButton > button:hover {
-        background: #fef2f2 !important;
-        border-color: #f87171 !important;
-    }
 
-    /* CHATBOT POPUP LATERAL (FIXO E ESTÁVEL) */
+    /* CHATBOT POPUP (FIXO E ESTÁVEL) */
     .chat-popup {
-        position: fixed; bottom: 100px; right: 30px; width: 380px; height: 550px;
+        position: fixed; bottom: 100px; right: 30px; width: 400px; max-height: 600px;
         background: white; border: 1px solid #1e40af; border-radius: 25px;
-        box-shadow: 0 25px 60px rgba(0,0,0,0.15); z-index: 9999; overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.15); z-index: 9999; 
+        display: flex; flex-direction: column; overflow: hidden;
     }
     .chat-header { background: #1e40af; color: white; padding: 20px; font-weight: 700; text-align: center; }
-
-    /* MÉTTRICAS E DASHBOARD */
-    .stMetric {
-        background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 25px;
-    }
+    .chat-content { padding: 25px; overflow-y: auto; background: #fdfdfd; max-height: 400px; }
     
+    .chat-bubble-agent {
+        background: #eff6ff; border-radius: 15px 15px 15px 0;
+        padding: 15px; margin-bottom: 12px; font-size: 14px; border: 1px solid #dbeafe;
+        color: #1e40af;
+    }
+
     .status-badge {
         padding: 6px 18px; border-radius: 50px; background: #eff6ff; 
         color: #1e40af; font-size: 12px; font-weight: 700; border: 1px solid #dbeafe;
     }
+    
+    .stMetric { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 20px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 4. TELA DE LOGIN (DESIGN CENTRALIZADO ÚNICO) ---
-def render_auth_screen():
+# --- 4. TELA DE LOGIN ---
+def render_auth():
     st.markdown("<div style='height: 12vh;'></div>", unsafe_allow_html=True)
     _, col_login, _ = st.columns([1, 1.4, 1])
     with col_login:
         st.markdown('<div class="main-card">', unsafe_allow_html=True)
         st.markdown("<h1 class='hero-title'>TECHNOBOLT HUB</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; color:#64748b; margin-bottom:40px; letter-spacing:1px;'>GOVERNANÇA COGNITIVA & IA ELITE</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; color:#64748b; margin-bottom:40px; letter-spacing:1px;'>TERMINAL DE GOVERNANÇA COGNITIVA</p>", unsafe_allow_html=True)
         
-        id_operador = st.text_input("Credencial de Operador", placeholder="Usuário")
-        chave_seguranca = st.text_input("Chave de Acesso", type="password", placeholder="Senha")
+        user_id = st.text_input("Credencial Identificadora", placeholder="Ex: jackson.antonio")
+        user_key = st.text_input("Chave de Segurança", type="password", placeholder="••••••••")
         
-        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
         if st.button("AUTENTICAR NO HUB"):
-            banco_usuarios = {
-                "admin": "admin",
-                "jackson.antonio": "teste@2025",
-                "luiza.trovao": "teste@2025",
-                "usuario.teste": "teste@2025"
-            }
-            if id_operador in banco_usuarios and banco_usuarios[id_operador] == chave_seguranca:
+            db_users = {"admin": "admin", "jackson.antonio": "teste@2025", "luiza.trovao": "teste@2025"}
+            if user_id in db_users and db_users[user_id] == user_key:
                 st.session_state.logged_in = True
-                st.session_state.user_atual = id_operador
+                st.session_state.user_atual = user_id
                 st.rerun()
             else:
-                st.error("Protocolo de Segurança: Credenciais não autorizadas.")
-        
-        st.markdown("<p style='text-align:center; color:#94a3b8; font-size:10px; margin-top:45px; letter-spacing:2px;'>SISTEMA PROTEGIDO POR AES-256</p>", unsafe_allow_html=True)
+                st.error("Protocolo negado. Credenciais inválidas.")
+        st.markdown("<p style='text-align:center; color:#94a3b8; font-size:10px; margin-top:45px;'>SISTEMA PROTEGIDO POR AES-256</p>", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
 if not st.session_state.logged_in:
-    render_auth_screen()
+    render_auth()
     st.stop()
 
 # --- 5. MOTOR DE INTELIGÊNCIA COM SEUS MODELOS ORIGINAIS (FAILOVER 5 NÍVEIS) ---
 api_key = os.environ.get("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+if api_key: genai.configure(api_key=api_key)
 
-# RECUPERAÇÃO DA SUA LISTA DE MODELOS ORIGINAIS
-MODEL_PRIORITY_LIST = [
+# LISTA DE MODELOS ORIGINAIS INTEGRADA
+MODEL_FAILOVER_LIST = [
     "models/gemini-3-flash-preview", 
     "models/gemini-2.5-flash", 
     "models/gemini-2.0-flash", 
@@ -193,180 +197,177 @@ MODEL_PRIORITY_LIST = [
     "models/gemini-flash-latest"
 ]
 
-def call_ai_technobolt_failover(prompt, attachments=None, onboarding_mode=False):
-    """Executa a requisição com failover automático entre seus 5 modelos e prompts McKinsey."""
+def call_technobolt_ai(prompt, attachments=None, onboarding=False):
+    """Executa a requisição com failover absoluto e System Instructions expandidas."""
     
-    # PROMPTS ROBUSTOS E APRIMORADOS
-    sys_instruction = (
+    sys_instr = (
         "Você é o Motor de Inteligência Estratégica da TechnoBolt Solutions. "
         "Sua postura é de um consultor sênior McKinsey/BCG/Bain. "
         "DIRETRIZES: 1. Respostas técnicas, analíticas e extremamente profundas. 2. Use terminologia executiva. "
-        "3. Markdown estruturado com tabelas e diagnósticos. 4. Foco total em ROI, Governança e Riscos. "
-        "Proibido saudações genéricas ou conversas informais. Responda diretamente ao ponto técnico."
+        "3. Markdown estruturado com diagnósticos e tabelas. 4. Foco total em ROI e Riscos. "
+        "Proibido saudações informais. Responda diretamente ao ponto técnico."
     )
     
-    if onboarding_mode:
-        sys_instruction = (
-            "Você é o Guia de Integração TechnoBolt. Explique de forma didática e executiva como "
-            "cada módulo do Hub resolve dores de negócio e gera eficiência operacional para o cliente."
+    if onboarding:
+        sys_instr = (
+            "Você é o Agente Virtual TechnoBolt. Seu objetivo é explicar como cada solução do Hub "
+            "auxilia na governança corporativa e eficiência operacional. Seja didático mas profissional."
         )
 
-    for model_name in MODEL_PRIORITY_LIST:
+    for model_id in MODEL_FAILOVER_LIST:
         try:
-            model = genai.GenerativeModel(model_name, system_instruction=sys_instruction)
+            model = genai.GenerativeModel(model_id, system_instruction=sys_instr)
             payload = [prompt] + attachments if attachments else prompt
             response = model.generate_content(payload)
-            return response.text, model_name
+            return response.text, model_id
         except Exception:
-            # Fallback manual para contingência (modelos legados)
-            try:
-                model_fb = genai.GenerativeModel(model_name)
-                full_p = f"{sys_instruction}\n\nSOLICITAÇÃO: {prompt}"
-                response = model_fb.generate_content([full_p] + attachments if attachments else full_p)
-                return response.text, model_name
-            except:
-                continue
-    return "⚠️ CRITICAL_ERROR: Todos os motores de redundância falharam.", "OFFLINE"
+            continue
+    return "⚠️ Motores de IA Offline. Contate a governança.", "OFFLINE"
 
-def extrair_texto_docx(arquivo_docx):
-    """Extração técnica de texto de arquivos Microsoft Word."""
-    doc = docx.Document(arquivo_docx)
-    return "\n".join([p.text for p in doc.paragraphs])
-
-def export_to_word_format(title, content):
-    """Gera um documento Microsoft Word com formatação corporativa e cabeçalho de auditoria."""
+def export_docx(title, content):
+    """Gera documentos Microsoft Word com formatação corporativa."""
     doc = docx.Document()
     doc.add_heading(title, 0)
     doc.add_paragraph(f"Relatório de Governança | Operador: {st.session_state.user_atual.upper()}")
-    doc.add_paragraph(f"TechnoBolt Hub Elite | Timestamp: {time.strftime('%d/%m/%Y %H:%M:%S')}")
+    doc.add_paragraph(f"Timestamp: {time.strftime('%d/%m/%Y %H:%M:%S')}")
     doc.add_paragraph("-" * 60)
     doc.add_paragraph(content)
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer
+    buf = BytesIO(); doc.save(buf); buf.seek(0)
+    return buf
 
-# --- 6. CABEÇALHO E NAVEGAÇÃO SUPERIOR ---
+def extrair_texto_docx(arquivo_docx):
+    """Extração técnica de texto de arquivos .docx."""
+    doc = docx.Document(arquivo_docx)
+    return "\n".join([p.text for p in doc.paragraphs])
+
+# --- 6. CABEÇALHO E NAVEGAÇÃO ---
 st.markdown("<div style='height:15px;'></div>", unsafe_allow_html=True)
-head_col1, head_col2 = st.columns([4, 1])
+head_l, head_r = st.columns([4, 1.2])
 
-with head_col1:
+with head_l:
     st.markdown(f"**OPERADOR:** <span class='status-badge'>{st.session_state.user_atual.upper()}</span>", unsafe_allow_html=True)
 
-with head_col2:
+with head_r:
     st.markdown('<div class="logout-zone">', unsafe_allow_html=True)
-    if st.button("🚪 Sair do Sistema"):
+    if st.button("🚪 Sair do Hub"):
         protocol_logout()
     st.markdown('</div>', unsafe_allow_html=True)
 
 menu_navegacao = [
-    "🏠 Dashboard de Comando",
-    "📁 Analisador McKinsey",
-    "📧 Email Intel (Lote)",
-    "✉️ Gerador de Emails",
-    "🧠 Briefing Estratégico",
-    "📝 Gestor de Atas",
-    "📈 Mercado & Churn",
+    "🏠 Dashboard de Comando", 
+    "📁 Analisador McKinsey", 
+    "📧 Email Intel (Lote)", 
+    "✉️ Gerador de Emails", 
+    "🧠 Briefing Estratégico", 
+    "📝 Gestor de Atas", 
+    "📈 Mercado & Churn", 
     "📊 Relatório Master"
 ]
-modulo_selecionado = st.selectbox("Seletor de Módulo", menu_navegacao, label_visibility="collapsed")
+escolha = st.selectbox("Seletor de Módulo", menu_navegacao, label_visibility="collapsed")
 st.markdown("<hr style='margin: 10px 0 35px 0; border: 0.5px solid #e2e8f0;'>", unsafe_allow_html=True)
 
-# --- 7. MÓDULOS DE FUNCIONALIDADES INTEGRAIS (460+ LINHAS) ---
+# --- 7. MÓDULOS DE FUNCIONALIDADES INTEGRAIS (SEM CORTES) ---
 
 # DASHBOARD
-if "🏠 Dashboard" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h1>Command Center</h1><p>Monitoramento de integridade da Governança Cognitiva e Redundância de Motores.</p></div>', unsafe_allow_html=True)
+if "🏠 Dashboard" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h1>Command Center</h1><p>Monitoria de Soberania Digital e Redundância Ativa.</p></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    with c1: st.metric("IA Engine", "Soberana", "Redundância On")
-    with c2: st.metric("Status Operador", st.session_state.user_atual.capitalize(), "Autenticado")
-    with c3: st.metric("Failover", "Ativo", "5 Camadas")
+    c1.metric("IA Engine", "Soberana", "Redundância On")
+    c2.metric("Sessão", st.session_state.user_atual.capitalize(), "Protegida")
+    c3.metric("Failover", "Ativo", "5 Camadas")
 
 # ANALISADOR MCKINSEY
-elif "📁 Analisador McKinsey" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h2>📁 Analisador de Documentos McKinsey</h2><p>Auditoria técnica e extração estratégica de valor com foco em mitigação de riscos.</p></div>', unsafe_allow_html=True)
-    arquivo_up = st.file_uploader("Submeter Documento (PDF/DOCX/TXT):", type=['pdf', 'docx', 'txt'])
-    if arquivo_up and st.button("EXECUTAR AUDITORIA SÊNIOR"):
-        with st.spinner("IA Processando sob padrão McKinsey de excelência..."):
-            if arquivo_up.type == "application/pdf":
-                dados_ia = [{"mime_type": "application/pdf", "data": arquivo_up.read()}]
-                p_mc = "Aja como McKinsey. Forneça: Resumo Executivo, Análise de Riscos, Impacto Financeiro/ROI e Plano de Ação 30-60-90."
+elif "📁 Analisador McKinsey" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h2>Analisador de Documentos McKinsey</h2><p>Auditoria técnica e extração estratégica de valor.</p></div>', unsafe_allow_html=True)
+    f_up = st.file_uploader("Documento (PDF/DOCX/TXT):", type=['pdf', 'docx', 'txt'])
+    if f_up and st.button("EXECUTAR AUDITORIA SÊNIOR"):
+        with st.spinner("Analisando estrutura estratégica..."):
+            if f_up.type == "application/pdf":
+                dados_ia = [{"mime_type": "application/pdf", "data": f_up.read()}]
+                p_mc = "Aja como McKinsey. Forneça: Resumo Executivo, Swot de Risco, ROI Estimado e Plano 90 dias."
             else:
-                texto_raw = extrair_texto_docx(arquivo_up) if arquivo_up.name.endswith('docx') else arquivo_up.read().decode(errors="ignore")
+                texto_raw = extrair_texto_docx(f_up) if f_up.name.endswith('docx') else f_up.read().decode(errors="ignore")
                 dados_ia = [texto_raw]
                 p_mc = "Analise tecnicamente este documento para a Technobolt Solutions sob a ótica de eficiência operacional."
             
-            res_ia, model_ia = call_ai_technobolt_failover(p_mc, dados_ia)
-            st.markdown(f"<p style='font-size:10px; color:#64748b;'>Processado via: {model_ia}</p>", unsafe_allow_html=True)
+            res_ia, mod_ia = call_technobolt_ai(p_mc, dados_ia)
+            st.markdown(f"<p style='font-size:10px; color:#64748b;'>Processado via: {mod_ia}</p>", unsafe_allow_html=True)
             st.markdown(res_ia)
-            st.download_button("📥 Baixar Relatório", data=export_to_word_format("Auditoria McKinsey", res_ia), file_name=f"Auditoria_{arquivo_up.name}.docx")
+            st.download_button("📥 Baixar Relatório", data=export_docx("Auditoria McKinsey", res_ia), file_name=f"Auditoria_{f_up.name}.docx")
 
 # EMAIL INTEL (LOTE)
-elif "📧 Email Intel" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h2>📧 Email Intel: Auditoria em Lote</h2><p>Processamento massivo de e-mails em PDF para triagem e inteligência.</p></div>', unsafe_allow_html=True)
-    lote_emails = st.file_uploader("Selecione os e-mails (PDF):", type=['pdf'], accept_multiple_files=True)
-    if lote_emails and st.button("PROCESSAR LOTE DE AUDITORIA"):
-        for email_pdf in lote_emails:
+elif "📧 Email Intel" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h2>Email Intel: Auditoria em Lote</h2><p>Processamento massivo de e-mails em PDF para triagem estratégica.</p></div>', unsafe_allow_html=True)
+    emails = st.file_uploader("Upload Emails (PDF):", type=['pdf'], accept_multiple_files=True)
+    if emails and st.button("PROCESSAR LOTE DE AUDITORIA"):
+        for email_pdf in emails:
             with st.expander(f"Auditoria: {email_pdf.name}", expanded=True):
-                res_email, _ = call_ai_technobolt_failover(f"Resuma este e-mail e rascunhe a resposta executiva ideal.", [{"mime_type": "application/pdf", "data": email_pdf.read()}])
+                res_email, _ = call_technobolt_ai("Resuma tecnicamente e rascunhe a resposta executiva ideal.", [{"mime_type": "application/pdf", "data": email_pdf.read()}])
                 st.markdown(res_email)
 
 # GERADOR DE EMAILS
-elif "✉️ Gerador de Emails" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h2>✉️ Gerador de Emails de Alto Impacto</h2></div>', unsafe_allow_html=True)
-    col_a, col_b = st.columns(2)
-    cargo_op = col_a.text_input("Seu Cargo:")
-    dest_op = col_b.text_input("Cargo do Destinatário:")
-    obj_email = st.text_area("Objetivo Central da Mensagem ou Tópicos:")
+elif "✉️ Gerador de Emails" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h2>Gerador de Emails de Alto Impacto</h2></div>', unsafe_allow_html=True)
+    ca, cb = st.columns(2)
+    cargo_e = ca.text_input("Seu Cargo para Assinatura:")
+    dest_e = cb.text_input("Cargo do Destinatário:")
+    
+    # NOVA BARRA DE FORMALIDADE
+    formalidade = st.select_slider("Nível de Formalidade Corporativa", 
+                                   options=["Casual/Startup", "Corporativo Padrão", "Executivo/Sênior", "Rígido/Diplomático"], 
+                                   value="Executivo/Sênior")
+    
+    contexto_e = st.text_area("Objetivo da Mensagem ou Tópicos Críticos:")
     if st.button("REDIGIR E-MAIL EXECUTIVO"):
-        with st.spinner("Redigindo rascunho executivo..."):
-            p_email = f"Como {cargo_op}, escreva um email para {dest_op} sobre {obj_email}. Use tom executivo de autoridade."
-            res_email, _ = call_ai_technobolt_failover(p_email)
+        with st.spinner("Redigindo rascunho..."):
+            p_email = f"Como {cargo_e}, escreva um email para {dest_e} sobre {contexto_e}. Nível de formalidade: {formalidade}. Tom de autoridade."
+            res_email, _ = call_technobolt_ai(p_email)
             st.markdown(f'<div class="main-card" style="max-width:100%;">{res_email}</div>', unsafe_allow_html=True)
-            st.download_button("📥 Baixar Word", data=export_to_word_format("Rascunho de E-mail", res_email), file_name="Rascunho_Email.docx")
+            st.download_button("📥 Baixar Rascunho", data=export_docx("Email Gerado", res_email), file_name="Rascunho_Email.docx")
 
 # BRIEFING ESTRATÉGICO
-elif "🧠 Briefing" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h2>🧠 Briefing Estratégico & Radar 2026</h2></div>', unsafe_allow_html=True)
-    empresa_alvo = st.text_input("Empresa ou Setor para Análise:")
+elif "🧠 Briefing" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h2>Briefing Estratégico & Radar 2026</h2></div>', unsafe_allow_html=True)
+    e_alvo = st.text_input("Empresa ou Setor Alvo:")
     if st.button("EXECUTAR SCAN DE MERCADO"):
-        res_brief, _ = call_ai_technobolt_failover(f"Gere um briefing estratégico 2026 completo para {empresa_alvo}. Foco em concorrência e riscos.")
-        st.markdown(res_brief)
+        with st.spinner("Escaneando mercado..."):
+            res_brief, _ = call_technobolt_ai(f"Gere um briefing estratégico 2026 completo para {e_alvo}. Foco em concorrência, market share e riscos disruptivos.")
+            st.markdown(res_brief)
 
 # GESTOR DE ATAS
-elif "📝 Gestor de Atas" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h2>📝 Gestor de Atas de Governança</h2></div>', unsafe_allow_html=True)
-    notas_reuniao = st.text_area("Notas ou Transcrição da Reunião:", height=280)
+elif "📝 Gestor de Atas" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h2>Gestor de Atas de Governança</h2></div>', unsafe_allow_html=True)
+    notas_r = st.text_area("Notas da Reunião ou Transcrição:", height=280)
     if st.button("FORMALIZAR ATA DE DIRETORIA"):
-        res_ata, _ = call_ai_technobolt_failover(f"Formalize as seguintes notas em uma Ata de Diretoria TechnoBolt Profissional: {notas_reuniao}")
-        st.markdown(f'<div class="main-card" style="max-width:100%;">{res_ata}</div>', unsafe_allow_html=True)
-        st.download_button("📥 Baixar Ata", data=export_to_word_format("Ata de Reunião", res_ata), file_name="Ata_Oficial.docx")
+        with st.spinner("Formatando ata..."):
+            res_ata, _ = call_technobolt_ai(f"Formalize as seguintes notas em uma Ata de Diretoria TechnoBolt Profissional: {notas_r}")
+            st.markdown(f'<div class="main-card" style="max-width:100%;">{res_ata}</div>', unsafe_allow_html=True)
+            st.download_button("📥 Baixar Ata Word", data=export_docx("Ata Oficial", res_ata), file_name="Ata_Oficial.docx")
 
 # MERCADO & CHURN
-elif "📈 Mercado & Churn" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h2>📈 Inteligência de Mercado & Churn</h2></div>', unsafe_allow_html=True)
-    tab_rival, tab_churn = st.tabs(["🔍 Radar de Concorrência", "⚠️ Risco de Churn"])
-    with tab_rival:
-        rival_n = st.text_input("Empresa Concorrente:")
-        if st.button("ANALISAR ESTRATÉGIA RIVAL"):
-            res_rival, _ = call_ai_technobolt_failover(f"Analise estrategicamente a empresa: {rival_n}")
-            st.markdown(res_rival)
-    with tab_churn:
-        feedback_c = st.text_area("Feedback do Cliente:")
-        if st.button("CALCULAR RISCO DE PERDA"):
-            res_churn, _ = call_ai_technobolt_failover(f"Avalie o risco de churn baseado neste feedback: {feedback_c}")
-            st.markdown(res_churn)
+elif "📈 Mercado & Churn" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h2>Inteligência de Mercado & Churn</h2></div>', unsafe_allow_html=True)
+    t1, t2 = st.tabs(["🔍 Radar de Concorrência", "⚠️ Risco de Churn"])
+    with t1:
+        rival = st.text_input("Empresa Concorrente:")
+        if st.button("ANALISAR RIVAL"):
+            res_rival, _ = call_technobolt_ai(f"Analise estrategicamente a empresa: {rival}"); st.markdown(res_rival)
+    with t2:
+        feed_c = st.text_area("Feedback do Cliente para Análise:");
+        if st.button("CALCULAR RISCO"):
+            res_churn, _ = call_technobolt_ai(f"Avalie o risco de churn baseado neste feedback e proponha retenção: {feed_c}"); st.markdown(res_churn)
 
 # RELATÓRIO MASTER
-elif "📊 Relatório Master" in modulo_selecionado:
-    st.markdown('<div class="main-card" style="max-width:100%;"><h2>📊 Relatório Master de Diretoria</h2></div>', unsafe_allow_html=True)
-    kpis_semana = st.text_area("Fatos e métricas da semana:")
+elif "📊 Relatório Master" in escolha:
+    st.markdown('<div class="main-card" style="max-width:100%;"><h2>Relatório Master de Diretoria</h2><p>Dossiê consolidado de KPIs e eventos da semana.</p></div>', unsafe_allow_html=True)
+    kpis = st.text_area("Fatos, métricas e decisões da semana:")
     if st.button("GERAR DOSSIÊ MASTER"):
-        res_master, _ = call_ai_technobolt_failover(f"Gere um Relatório Master de Governança consolidando: {kpis_semana}")
-        st.markdown(res_master)
-        st.download_button("📥 Baixar Dossiê", data=export_to_word_format("Relatório Master", res_master), file_name="Master_Dossie.docx")
+        with st.spinner("Consolidando governança..."):
+            res_master, _ = call_technobolt_ai(f"Gere um Relatório Master de Governança TechnoBolt consolidando: {kpis}. Foco em impacto executivo.")
+            st.markdown(res_master)
+            st.download_button("📥 Baixar Dossiê", data=export_docx("Relatório Master", res_master), file_name="Master_Dossie.docx")
 
-# --- 8. CHATBOT POPUP LATERAL DE ONBOARDING (ESTÁVEL) ---
+# --- 8. CHATBOT POPUP (AGENTE VIRTUAL CORRIGIDO) ---
 
 
 
@@ -377,17 +378,31 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 with st.container():
-    col_vazia, col_chat_ui = st.columns([4, 1.3])
-    with col_chat_ui:
-        if st.checkbox("Assistente de Módulos", key="check_onboarding_hub"):
-            st.markdown('<div class="chat-popup"><div class="chat-header">Guia de Soluções TechnoBolt</div>', unsafe_allow_html=True)
-            st.markdown("<div style='padding:20px;'>", unsafe_allow_html=True)
-            mod_para_explicar = st.selectbox("Selecione o módulo para entender:", menu_navegacao, key="sel_expl_onb")
-            if st.button("SOLICITAR EXPLICAÇÃO"):
-                guia_texto, _ = call_ai_technobolt_failover(f"Explique como o módulo '{mod_para_explicar}' funciona e seus benefícios corporativos.", onboarding_mode=True)
-                st.info(guia_texto)
-            st.markdown("</div></div>", unsafe_allow_html=True)
+    col_v, col_chat = st.columns([4, 1.4])
+    with col_chat:
+        if st.checkbox("Agente Virtual", key="chat_pop_v7"):
+            st.markdown('<div class="chat-popup"><div class="chat-header">Hub de Soluções</div>', unsafe_allow_html=True)
+            st.markdown('<div class="chat-content">', unsafe_allow_html=True)
+            
+            # Lógica de Menu dentro do Chat
+            if st.session_state.chat_step == "menu":
+                st.markdown('<div class="chat-bubble-agent">Olá! Sou seu assistente TechnoBolt. Qual solução você deseja entender em detalhes agora?</div>', unsafe_allow_html=True)
+                for item in menu_navegacao:
+                    if st.button(f"Saber mais: {item}", key=f"btn_chat_{item}"):
+                        with st.spinner("IA Processando..."):
+                            st.session_state.chat_response, _ = call_technobolt_ai(f"Explique o valor corporativo e como usar o módulo: {item}", onboarding=True)
+                            st.session_state.chat_step = "response"
+                            st.rerun()
+            
+            # Lógica de Resposta e Conversa
+            if st.session_state.chat_step == "response":
+                st.markdown(f'<div class="chat-bubble-agent">{st.session_state.chat_response}</div>', unsafe_allow_html=True)
+                if st.button("Voltar ao Menu Principal"):
+                    st.session_state.chat_step = "menu"
+                    st.rerun()
+            
+            st.markdown('</div></div>', unsafe_allow_html=True)
 
-# --- RODAPÉ DE GOVERNANÇA ---
+# --- 9. RODAPÉ DE GOVERNANÇA ---
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
-st.caption(f"TechnoBolt Solutions © 2026 | Elite Hub Edition v6.5 | Operador: {st.session_state.user_atual.upper()}")
+st.caption(f"TechnoBolt Solutions © 2026 | Elite Hub Edition v1.0 | Protocolo: {st.session_state.user_atual.upper()}")
