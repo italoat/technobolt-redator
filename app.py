@@ -126,46 +126,48 @@ def tela_login():
     col1, col2, col3 = st.columns([1, 1.8, 1])
     
     with col2:
+        # TUDO DENTRO DO CARD (Utilizando container para o glassmorphism envolver os widgets)
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        
         st.markdown("""
-            <div class='login-card'>
-                <p style='color: #60a5fa; font-weight: 800; letter-spacing: 4px; margin-bottom: 0;'>TECHNOBOLT</p>
-                <h1 class='main-title'>HUB DE GOVERNANÇA COGNITIVA</h1>
-                <p style='color: #94a3b8; font-size: 14px; margin-bottom: 40px; letter-spacing: 1px;'>Sistema de Inteligência e Monitoria Resiliente</p>
-            </div>
+            <p style='color: #60a5fa; font-weight: 800; letter-spacing: 4px; margin-bottom: 0;'>TECHNOBOLT</p>
+            <h1 class='main-title'>HUB DE GOVERNANÇA COGNITIVA</h1>
+            <p style='color: #94a3b8; font-size: 14px; margin-bottom: 30px; letter-spacing: 1px;'>Sistema de Inteligência Resiliente</p>
         """, unsafe_allow_html=True)
         
-        with st.container():
-            u_in = st.text_input("Identificador de Usuário", placeholder="Login", label_visibility="collapsed")
-            
-            # Lógica funcional de visualizar senha
-            col_pwd, col_eye = st.columns([0.88, 0.12])
-            with col_eye:
-                st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-                ver_senha = st.checkbox("👁️", help="Exibir/Ocultar senha")
-            
-            with col_pwd:
-                p_in = st.text_input("Senha", 
-                                    type="default" if ver_senha else "password", 
-                                    placeholder="Senha de Acesso", 
-                                    label_visibility="collapsed")
-            
-            st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
-            
-            if st.button("INICIAR CONEXÃO SEGURA"):
-                usuarios = {
-                    "admin": "admin",
-                    "jackson.antonio": "teste@2025",
-                    "luiza.trovao": "teste@2025",
-                    "usuario.teste": "teste@2025"
-                }
-                if u_in in usuarios and usuarios[u_in] == p_in:
-                    st.session_state.logged_in = True
-                    st.session_state.user_atual = u_in
-                    st.rerun()
-                else:
-                    st.error("⚠️ ACESSO NEGADO: Credenciais não autorizadas.")
+        # Campos de entrada
+        u_in = st.text_input("Identificador de Usuário", placeholder="Login", label_visibility="collapsed")
         
-        st.markdown("<p style='text-align: center; color: #1e3a8a; font-size: 10px; margin-top: 40px; letter-spacing: 3px;'>PROTOCOLO DE SEGURANÇA AES-256 ATIVO</p>", unsafe_allow_html=True)
+        # Colunas internas para Senha + Visualizar
+        col_pwd, col_eye = st.columns([0.85, 0.15])
+        with col_eye:
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            ver_senha = st.checkbox("👁️")
+        
+        with col_pwd:
+            p_in = st.text_input("Senha", 
+                                type="default" if ver_senha else "password", 
+                                placeholder="Senha", 
+                                label_visibility="collapsed")
+        
+        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+        
+        if st.button("INICIAR CONEXÃO SEGURA"):
+            usuarios = {
+                "admin": "admin",
+                "jackson.antonio": "teste@2025",
+                "luiza.trovao": "teste@2025",
+                "usuario.teste": "teste@2025"
+            }
+            if u_in in usuarios and usuarios[u_in] == p_in:
+                st.session_state.logged_in = True
+                st.session_state.user_atual = u_in
+                st.rerun()
+            else:
+                st.error("⚠️ ACESSO NEGADO")
+
+        st.markdown("<p style='color: #1e3a8a; font-size: 10px; margin-top: 30px; letter-spacing: 3px;'>PROTOCOLO AES-256 ATIVO</p>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if not st.session_state.logged_in:
     tela_login()
