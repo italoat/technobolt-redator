@@ -165,16 +165,12 @@ def tela_login():
         label_visibility="collapsed"
     )
 
-    col_pwd, col_eye = st.columns([0.85, 0.15])
-    with col_eye:
-        st.markdown("<div class='eye-wrapper'>", unsafe_allow_html=True)
-        ver_senha = st.checkbox("👁️", label_visibility="collapsed")
-        st.markdown("</div>", unsafe_allow_html=True)
+    col_pwd = st.columns([0.85, 0.15])
 
     with col_pwd:
         p_in = st.text_input(
             "SENHA",
-            type="default" if ver_senha else "password",
+            type="password",
             placeholder="Chave criptográfica",
             label_visibility="collapsed"
         )
