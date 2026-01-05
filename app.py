@@ -144,44 +144,64 @@ if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
 def tela_login():
-    st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
-    col1, col_login, col3 = st.columns([1, 2, 1])
-    
-    with col_login:
-        st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        st.markdown("""
-            <p style='color: #60a5fa; font-weight: 800; letter-spacing: 5px; margin-bottom: 5px;'>SISTEMA ATIVO</p>
-            <h1 class='main-title'>TECHNOBOLT - HUB DE GOVERNANÇA COGNITIVA</h1>
-            <p style='color: #94a3b8; font-size: 15px; margin-bottom: 50px; letter-spacing: 1px;'>INSIRA SUAS CREDENCIAIS PARA CONEXÃO SEGURA</p>
-        """, unsafe_allow_html=True)
-        
-        # Inputs organizados dentro do card
-        u_in = st.text_input("USUÁRIO IDENTIFICADOR", placeholder="Identidade do Operador")
-        
-        col_pwd, col_eye = st.columns([0.88, 0.12])
-        with col_eye:
-            st.markdown("<div style='height: 42px;'></div>", unsafe_allow_html=True)
-            ver_senha = st.checkbox("👁️")
-        with col_pwd:
-            p_in = st.text_input("CHAVE CRIPTOGRÁFICA", type="default" if ver_senha else "password", placeholder="Chave de Acesso")
-        
-        st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
-        if st.button("INICIAR CONEXÃO HUB"):
-            usuarios = {
-                "admin": "admin",
-                "jackson.antonio": "teste@2025",
-                "luiza.trovao": "teste@2025",
-                "usuario.teste": "teste@2025"
-            }
-            if u_in in usuarios and usuarios[u_in] == p_in:
-                st.session_state.logged_in = True
-                st.session_state.user_atual = u_in
-                st.rerun()
-            else:
-                st.error("⚠️ ACESSO NEGADO: Credenciais não autorizadas pelo protocolo.")
-        
-        st.markdown("<p style='color: #1e3a8a; font-size: 10px; margin-top: 45px; letter-spacing: 3px;'>PROTOCOLO DE SEGURANÇA MILITAR AES-256 ATIVO</p>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
+
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+
+    st.markdown("""
+        <p style='color:#60a5fa;font-weight:700;letter-spacing:4px;font-size:11px;margin-bottom:6px;'>
+            SISTEMA ATIVO
+        </p>
+        <h1 class='main-title'>TECHNOBOLT IA</h1>
+        <p class='login-subtitle'>
+            HUB DE GOVERNANÇA COGNITIVA<br>
+            Autenticação segura requerida
+        </p>
+    """, unsafe_allow_html=True)
+
+    u_in = st.text_input(
+        "USUÁRIO",
+        placeholder="Identidade do operador",
+        label_visibility="collapsed"
+    )
+
+    col_pwd, col_eye = st.columns([0.85, 0.15])
+    with col_eye:
+        st.markdown("<div class='eye-wrapper'>", unsafe_allow_html=True)
+        ver_senha = st.checkbox("👁️", label_visibility="collapsed")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col_pwd:
+        p_in = st.text_input(
+            "SENHA",
+            type="default" if ver_senha else "password",
+            placeholder="Chave criptográfica",
+            label_visibility="collapsed"
+        )
+
+    st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+
+    if st.button("INICIAR CONEXÃO"):
+        usuarios = {
+            "admin": "admin",
+            "jackson.antonio": "teste@2025",
+            "luiza.trovao": "teste@2025",
+            "usuario.teste": "teste@2025"
+        }
+        if u_in in usuarios and usuarios[u_in] == p_in:
+            st.session_state.logged_in = True
+            st.session_state.user_atual = u_in
+            st.rerun()
+        else:
+            st.error("Acesso negado. Credenciais inválidas.")
+
+    st.markdown("""
+        <p style='margin-top:32px;font-size:10px;color:#1e3a8a;letter-spacing:3px;'>
+            AES-256 • ZERO TRUST • SESSION LOCK
+        </p>
+    """, unsafe_allow_html=True)
+
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
 if not st.session_state.logged_in:
     tela_login()
