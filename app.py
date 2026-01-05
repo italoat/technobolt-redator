@@ -168,7 +168,6 @@ def tela_login():
                 st.error("⚠️ ACESSO NEGADO: Credenciais não autorizadas pelo protocolo.")
         
         st.markdown("<p style='color: #1e3a8a; font-size: 10px; margin-top: 45px; letter-spacing: 3px;'>PROTOCOLO DE SEGURANÇA MILITAR AES-256 ATIVO</p>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 if not st.session_state.logged_in:
     tela_login()
