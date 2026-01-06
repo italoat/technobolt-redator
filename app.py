@@ -347,7 +347,7 @@ elif "🏠 Centro" in escolha:
     # GIF HIGH-TECH SOLICITADO
     st.markdown("""
     <div class="high-tech-container">
-        <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJocXN0Mndxdm9tNno1YnB5N2Z3eG9uYnV3Z3p3eDlyZ3p3eHozZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjPBMuV9M2K0M/giphy.gif" alt="Tecnologia Girando">
+        <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXlsaTYwaDZkeGc2MjMxcXk4MWJjMGtwcHEwNTZ6dHFkaXV0NzNxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/eljCVpMrhepUSgZaVP/giphy.gif" alt="Tecnologia Girando">
     </div>
     """, unsafe_allow_html=True)
 
