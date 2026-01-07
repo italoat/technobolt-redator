@@ -56,7 +56,7 @@ def protocol_logout():
     st.rerun()
 
 def enviar_notificacao_email(assunto, corpo):
-    """Envia notificações usando SSL na porta 465 (Alta compatibilidade)."""
+    """Versão de Debug: Envia e-mail e exibe erros detalhados no Try/Except."""
     remetente = "technoboltconsultoria@gmail.com"
     destinatario = "technoboltconsultoria@gmail.com"
     senha_app = "uxagfbfemjmvawun" 
@@ -68,16 +68,26 @@ def enviar_notificacao_email(assunto, corpo):
     msg.attach(MIMEText(corpo, 'plain'))
 
     try:
-        # Forçamos o login e o envio via SSL porta 465
+        # Tenta conexão via SSL
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            # Mostra o progresso no console (apenas visível no terminal de hospedagem)
+            server.set_debuglevel(1) 
             server.login(remetente, senha_app)
-            # Criamos a string do email corretamente
             server.sendmail(remetente, destinatario, msg.as_string())
+        
+        # Se chegar aqui, funcionou
+        st.toast(f"✅ E-mail '{assunto}' enviado com sucesso!")
         return True
+
+    except smtplib.SMTPAuthenticationError:
+        st.error("❌ Erro de Autenticação: A 'Senha de App' está incorreta ou a Verificação em 2 Etapas foi desativada.")
+    except smtplib.SMTPConnectError:
+        st.error("❌ Erro de Conexão: O servidor não conseguiu se conectar ao SMTP do Google. Verifique o Firewall/Rede.")
     except Exception as e:
-        # Log visual para você debugar se houver erro
-        st.sidebar.error(f"Erro SMTP: {e}")
-        return False
+        # Captura qualquer outro erro e mostra o tipo e a mensagem
+        st.error(f"❌ Falha inesperada no envio: {type(e).__name__} - {e}")
+    
+    return False
 
 def registrar_evento(funcao):
     """Rastreia quais funções o usuário utilizou durante a sessão."""
@@ -269,8 +279,6 @@ st.markdown("""
         position: absolute; top: 20px; right: 20px; cursor: pointer;
         font-size: 24px; font-weight: bold; color: #64748b;
     }     
-[data-testid="stHeader"] { z-index: 0 !important; }
-    .stApp { z-index: 1; }
             
 </style>
 """, unsafe_allow_html=True)
