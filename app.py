@@ -623,40 +623,56 @@ elif "📊 Relatório Master" in escolha:
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 st.caption(f"TechnoBolt Solutions © 2026 | Elite Hub Edition v1.0 | Operador: {st.session_state.user_atual.upper()}")
 
-# --- 9. RENDERIZAÇÃO DO MODAL (SEMPRE NO FINAL DO ARQUIVO) ---
+# --- 9. RENDERIZAÇÃO DO MODAL (FINAL DO ARQUIVO) ---
 if st.session_state.get('mostrar_modal'):
     conteudo_html = st.session_state.conteudo_modal.replace('\n', '<br>')
     
     st.markdown(f"""
     <div id="modal-overlay" style="
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.9); z-index: 999999;
+        background: rgba(15, 23, 42, 0.9); z-index: 1000000;
         display: flex; justify-content: center; align-items: center; padding: 20px;">
         
-        <div style="
-            background: white; padding: 40px; border-radius: 24px;
-            max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;
-            position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid #e2e8f0;">
+        <div id="modal-box" style="
+            background: white; padding: 40px; border-radius: 20px;
+            max-width: 850px; width: 100%; max-height: 85vh; overflow-y: auto;
+            position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border: 1px solid #e2e8f0; animation: modalIn 0.3s ease;">
             
             <div onclick="window.location.reload();" style="
-                position: absolute; top: 15px; right: 25px; 
-                font-size: 35px; cursor: pointer; color: #94a3b8;">&times;</div>
+                position: absolute; top: 15px; right: 20px; 
+                font-size: 35px; cursor: pointer; color: #94a3b8; 
+                line-height: 1; font-weight: bold;">&times;</div>
             
-            <h2 style="color:#1e40af; font-weight: 700; margin-top: 0;">{st.session_state.titulo_modal}</h2>
+            <h2 style="color:#1e40af; margin-top: 0; padding-right: 30px;">{st.session_state.titulo_modal}</h2>
             <hr style="border: 0.5px solid #f1f5f9; margin-bottom: 25px;">
-            <div style="color:#334155; line-height:1.7; font-size: 16px;">{conteudo_html}</div>
+            
+            <div style="color:#334155; line-height:1.7; font-size: 16px; text-align: left;">
+                {conteudo_html}
+            </div>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <button onclick="window.location.reload();" style="
+                    background: #1e40af; color: white; border: none; 
+                    padding: 12px 30px; border-radius: 10px; cursor: pointer;
+                    font-weight: 600; text-transform: uppercase;">Fechar Visualização</button>
+            </div>
         </div>
     </div>
 
+    <style>
+        @keyframes modalIn {{ from {{ opacity: 0; transform: scale(0.95); }} to {{ opacity: 1; transform: scale(1); }} }}
+        /* Garante que o fundo do Streamlit não quebre o modal */
+        [data-testid="stHeader"] {{ z-index: 0 !important; }}
+    </style>
+
     <script>
-        // Fechar ao clicar fora (no fundo escuro)
+        // Fechar ao clicar fora ou ESC
         document.getElementById('modal-overlay').onclick = function(e) {{
             if (e.target.id === 'modal-overlay') window.location.reload();
         }};
-        
-        // Fechar com a tecla ESC
-        document.addEventListener('keydown', (e) => {{
-            if (e.key === 'Escape') window.location.reload();
+        document.addEventListener('keydown', function(e) {{
+            if (e.key === "Escape") window.location.reload();
         }}, {{once: true}});
     </script>
     """, unsafe_allow_html=True)
