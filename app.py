@@ -1,13 +1,13 @@
 import streamlit as st
-import smtplib
 import google.generativeai as genai
 import os
 import time
 import docx  # Requer: pip install python-docx
 from io import BytesIO
 import base64
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import signal
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 # --- 1. CONFIGURAÇÃO DE SEGURANÇA E PROTOCOLO (ELITE HUB) ---
 st.set_page_config(
@@ -40,54 +40,57 @@ chaves_sessao = {
 for chave, valor in chaves_sessao.items():
     if chave not in st.session_state:
         st.session_state[chave] = valor
-        
+def salvar_ao_encerrar():
+    """Tenta enviar o relatório se a sessão cair ou o usuário sair."""
+    # Verificamos se havia um usuário logado mas agora a sessão foi resetada
+    if st.session_state.get('user_atual'):
+        tempo = round((time.time() - st.session_state.get('login_time', time.time())) / 60, 2)
+        acoes = st.session_state.get('uso_sessao', {})
+        relatorio = f"SESSÃO FINALIZADA\nUsuário: {st.session_state.user_atual}\nTempo: {tempo} min\nAções: {acoes}"
+        enviar_notificacao_email(f"Relatório de Encerramento - {st.session_state.user_atual}", relatorio)
+
+# Se o sistema detectar que o estado de login sumiu mas o nome do usuário ainda está no rastro
+if not st.session_state.logged_in and st.session_state.get('user_atual'):
+    salvar_ao_encerrar()
+    # Limpa o rastro para não enviar duplicado
+    st.session_state.user_atual = None
+
 def protocol_logout():
-    """Gera relatório de uso e finaliza a sessão."""
-    tempo_logado = round((time.time() - st.session_state.login_time) / 60, 2)
-    relatorio_uso = f"""
-    Relatório de Uso - Usuário: {st.session_state.user_atual}
-    Tempo Total: {tempo_logado} minutos.
-    Ações realizadas: {st.session_state.uso_sessao}
-    """
-    enviar_notificacao_email("Relatório de Uso", relatorio_uso)
-    
+    """Gera o relatório manual e limpa o estado para o redirecionamento."""
+    if st.session_state.get('logged_in'):
+        # 1. Dispara o relatório imediatamente
+        tempo = round((time.time() - st.session_state.get('login_time', time.time())) / 60, 2)
+        acoes = st.session_state.get('uso_sessao', {})
+        relatorio = f"LOGOUT MANUAL\nUsuário: {st.session_state.user_atual}\nTempo: {tempo} min\nAções: {acoes}"
+        enviar_notificacao_email(f"Relatório de Uso - {st.session_state.user_atual}", relatorio)
+            
+    # 2. Reseta as chaves. Isso impedirá que a lógica de "Auto-Logout" envie o e-mail de novo
     st.session_state.logged_in = False
     st.session_state.user_atual = None
+    st.session_state.uso_sessao = {}
+    
     st.rerun()
 
 def enviar_notificacao_email(assunto, corpo):
-    """Versão de Debug: Envia e-mail e exibe erros detalhados no Try/Except."""
-    remetente = "technoboltconsultoria@gmail.com"
-    destinatario = "technoboltconsultoria@gmail.com"
-    senha_app = "uxagfbfemjmvawun" 
+    """Envia e-mail via API SendGrid - Ultra compatível com Render."""
 
-    msg = MIMEMultipart()
-    msg['From'] = remetente
-    msg['To'] = destinatario
-    msg['Subject'] = assunto
-    msg.attach(MIMEText(corpo, 'plain'))
-
-    try:
-        # Tenta conexão via SSL
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            # Mostra o progresso no console (apenas visível no terminal de hospedagem)
-            server.set_debuglevel(1) 
-            server.login(remetente, senha_app)
-            server.sendmail(remetente, destinatario, msg.as_string())
-        
-        # Se chegar aqui, funcionou
-        st.toast(f"✅ E-mail '{assunto}' enviado com sucesso!")
-        return True
-
-    except smtplib.SMTPAuthenticationError:
-        st.error("❌ Erro de Autenticação: A 'Senha de App' está incorreta ou a Verificação em 2 Etapas foi desativada.")
-    except smtplib.SMTPConnectError:
-        st.error("❌ Erro de Conexão: O servidor não conseguiu se conectar ao SMTP do Google. Verifique o Firewall/Rede.")
-    except Exception as e:
-        # Captura qualquer outro erro e mostra o tipo e a mensagem
-        st.error(f"❌ Falha inesperada no envio: {type(e).__name__} - {e}")
+    # COLOQUE SUA CHAVE SG AQUI
+    sg_key = os.environ.get("SENDGRID_API_KEY") 
     
-    return False
+    message = Mail(
+        from_email='technoboltconsultoria@gmail.com',
+        to_emails='technoboltconsultoria@gmail.com',
+        subject=assunto,
+        plain_text_content=corpo)
+    
+    try:
+        sg = SendGridAPIClient(sg_key)
+        sg.send(message)
+        return True
+    except Exception as e:
+        # Erro logado silenciosamente no servidor para não travar o usuário
+        print(f"Erro SendGrid: {e}")
+        return False
 
 def registrar_evento(funcao):
     """Rastreia quais funções o usuário utilizou durante a sessão."""
@@ -502,8 +505,12 @@ elif "📁 Analisador McKinsey" in escolha:
                 dados_ia = [texto_raw]
             
             res_ia, mod_ia = call_technobolt_ai("Audite este documento focando em ROI e riscos.", dados_ia, system_context="mckinsey")
-            mostrar_popup(f"Auditoria McKinsey - {mod_ia}", res_ia)
-            st.download_button("📥 Baixar Relatório", data=export_docx("Auditoria McKinsey", res_ia), file_name=f"Auditoria_{arquivo_up.name}.docx")
+            
+            # Lógica de Popup Corrigida
+            st.session_state.titulo_modal = f"Auditoria McKinsey - {mod_ia}"
+            st.session_state.conteudo_modal = res_ia
+            st.session_state.mostrar_modal = True
+            st.rerun()
 
 # EMAIL INTEL (LOTE)
 elif "📧 Email Intel" in escolha:
@@ -516,7 +523,11 @@ elif "📧 Email Intel" in escolha:
             for email_pdf in emails:
                 res_email, _ = call_technobolt_ai("Resuma tecnicamente e rascunhe a resposta ideal.", [{"mime_type": "application/pdf", "data": email_pdf.read()}], system_context="email")
                 relatorio_lote += f"<h3>Email: {email_pdf.name}</h3>{res_email}<hr>"
-            mostrar_popup("Relatório de Auditoria em Lote", relatorio_lote)
+            
+            st.session_state.titulo_modal = "Relatório de Auditoria em Lote"
+            st.session_state.conteudo_modal = relatorio_lote
+            st.session_state.mostrar_modal = True
+            st.rerun()
 
 # GERADOR DE EMAILS COM BARRA DE FORMALIDADE
 elif "✉️ Gerador de Emails" in escolha:
@@ -533,8 +544,11 @@ elif "✉️ Gerador de Emails" in escolha:
         with st.spinner("IA Redigindo..."):
             p_email = f"Como {cargo_e}, escreva um email para {dest_e} sobre {contexto_e}. Formalidade: {formalidade}."
             res_email, _ = call_technobolt_ai(p_email, system_context="email")
-            mostrar_popup("Rascunho Executivo Gerado", res_email)
-            st.download_button("📥 Baixar Word", data=export_docx("Email Gerado", res_email), file_name="Rascunho_Email.docx")
+            
+            st.session_state.titulo_modal = "Rascunho Executivo Gerado"
+            st.session_state.conteudo_modal = res_email
+            st.session_state.mostrar_modal = True
+            st.rerun()
 
 # BRIEFING ESTRATÉGICO
 elif "🧠 Briefing" in escolha:
@@ -544,7 +558,11 @@ elif "🧠 Briefing" in escolha:
         registrar_evento("Briefing Estratégico")
         with st.spinner("Escaneando mercado..."):
             res_brief, mod = call_technobolt_ai(f"Gere um briefing estratégico completo para {e_alvo}.", system_context="briefing")
-            mostrar_popup(f"Briefing Estratégico - {e_alvo}", res_brief)
+            
+            st.session_state.titulo_modal = f"Briefing Estratégico - {e_alvo}"
+            st.session_state.conteudo_modal = res_brief
+            st.session_state.mostrar_modal = True
+            st.rerun()
 
 # GESTOR DE ATAS COM RACI
 elif "📝 Gestor de Atas" in escolha:
@@ -554,8 +572,11 @@ elif "📝 Gestor de Atas" in escolha:
         registrar_evento("Gestor de Atas")
         with st.spinner("Formatando ata..."):
             res_ata, _ = call_technobolt_ai(f"Formalize as seguintes notas em Ata de Diretoria: {notas_r}", system_context="ata")
-            mostrar_popup("Ata de Diretoria Formalizada", res_ata)
-            st.download_button("📥 Baixar Ata Word", data=export_docx("Ata Oficial", res_ata), file_name="Ata_Oficial.docx")
+            
+            st.session_state.titulo_modal = "Ata de Diretoria Formalizada"
+            st.session_state.conteudo_modal = res_ata
+            st.session_state.mostrar_modal = True
+            st.rerun()
 
 # MERCADO & CHURN
 elif "📈 Mercado & Churn" in escolha:
@@ -567,14 +588,22 @@ elif "📈 Mercado & Churn" in escolha:
             registrar_evento("Análise de Rival")
             with st.spinner("Analisando concorrência..."):
                 res_r, _ = call_technobolt_ai(f"Análise competitiva profunda de: {rival_n}", system_context="briefing")
-                mostrar_popup(f"Radar de Concorrência: {rival_n}", res_r)
+                
+                st.session_state.titulo_modal = f"Radar de Concorrência: {rival_n}"
+                st.session_state.conteudo_modal = res_r
+                st.session_state.mostrar_modal = True
+                st.rerun()
     with tab_churn:
-        feed_c = st.text_area("Feedback do Cliente para Análise de Risco:");
+        feed_c = st.text_area("Feedback do Cliente para Análise de Risco:")
         if st.button("CALCULAR RISCO DE PERDA"):
             registrar_evento("Cálculo de Churn")
             with st.spinner("Avaliando risco..."):
                 res_c, _ = call_technobolt_ai(f"Avalie o risco de churn baseado no feedback: {feed_c}")
-                mostrar_popup("Diagnóstico de Risco (Churn)", res_c)
+                
+                st.session_state.titulo_modal = "Diagnóstico de Risco (Churn)"
+                st.session_state.conteudo_modal = res_c
+                st.session_state.mostrar_modal = True
+                st.rerun()
 
 # RELATÓRIO MASTER
 elif "📊 Relatório Master" in escolha:
@@ -584,9 +613,50 @@ elif "📊 Relatório Master" in escolha:
         registrar_evento("Relatório Master")
         with st.spinner("Consolidando dados..."):
             res_master, _ = call_technobolt_ai(f"Gere um Relatório Master consolidando: {kpis}.", system_context="ata")
-            mostrar_popup("Relatório Master Consolidado", res_master)
-            st.download_button("📥 Baixar Relatório", data=export_docx("Relatório Master", res_master), file_name="Master_Dossie.docx")
+            
+            st.session_state.titulo_modal = "Relatório Master Consolidado"
+            st.session_state.conteudo_modal = res_master
+            st.session_state.mostrar_modal = True
+            st.rerun()
 
 # --- 8. RODAPÉ DE GOVERNANÇA ---
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 st.caption(f"TechnoBolt Solutions © 2026 | Elite Hub Edition v1.0 | Operador: {st.session_state.user_atual.upper()}")
+
+# --- 9. RENDERIZAÇÃO DO MODAL (SEMPRE NO FINAL DO ARQUIVO) ---
+if st.session_state.get('mostrar_modal'):
+    conteudo_html = st.session_state.conteudo_modal.replace('\n', '<br>')
+    
+    st.markdown(f"""
+    <div id="modal-overlay" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.9); z-index: 999999;
+        display: flex; justify-content: center; align-items: center; padding: 20px;">
+        
+        <div style="
+            background: white; padding: 40px; border-radius: 24px;
+            max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;
+            position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid #e2e8f0;">
+            
+            <div onclick="window.location.reload();" style="
+                position: absolute; top: 15px; right: 25px; 
+                font-size: 35px; cursor: pointer; color: #94a3b8;">&times;</div>
+            
+            <h2 style="color:#1e40af; font-weight: 700; margin-top: 0;">{st.session_state.titulo_modal}</h2>
+            <hr style="border: 0.5px solid #f1f5f9; margin-bottom: 25px;">
+            <div style="color:#334155; line-height:1.7; font-size: 16px;">{conteudo_html}</div>
+        </div>
+    </div>
+
+    <script>
+        // Fechar ao clicar fora (no fundo escuro)
+        document.getElementById('modal-overlay').onclick = function(e) {{
+            if (e.target.id === 'modal-overlay') window.location.reload();
+        }};
+        
+        // Fechar com a tecla ESC
+        document.addEventListener('keydown', (e) => {{
+            if (e.key === 'Escape') window.location.reload();
+        }}, {{once: true}});
+    </script>
+    """, unsafe_allow_html=True)
