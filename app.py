@@ -9,6 +9,7 @@ import signal
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
+
 # --- 1. CONFIGURAÇÃO DE SEGURANÇA E PROTOCOLO (ELITE HUB) ---
 st.set_page_config(
     page_title="TechnoBolt IA - Elite Hub de Governança",
