@@ -295,6 +295,14 @@ def render_auth():
         user_id = st.text_input("Identificador de Operador", placeholder="Usuário")
         user_key = st.text_input("Chave de Acesso Segura", type="password", placeholder="Senha")
         
+        if st.button("🚨 TESTAR DISPARO DE E-MAIL AGORA"):
+            st.write("Tentando disparar e-mail de teste...")
+            resultado = enviar_notificacao_email("TESTE MANUAL", "O botão de teste foi acionado com sucesso.")
+            if resultado:
+                st.success("O código executou o envio sem erros!")
+            else:
+                st.error("O código tentou enviar, mas a função retornou Falso.")
+
         if st.button("AUTENTICAR NO HUB"):
             banco_users = {"admin": "admin", "jackson.antonio": "teste@2025", "luiza.trovao": "teste@2025"}
             if user_id in banco_users and banco_users[user_id] == user_key:
@@ -308,6 +316,7 @@ def render_auth():
                 enviar_notificacao_email("Relatório de Login", f"Usuário {user_id} acessou o sistema às {agora}.")
                 
                 st.rerun()
+
 
 if not st.session_state.logged_in:
     render_auth()
