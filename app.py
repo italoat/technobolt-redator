@@ -80,16 +80,38 @@ def registrar_evento(funcao):
     st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
 
 def mostrar_popup(titulo, conteudo):
-    """Renderiza o retorno da IA em um formato de popup corporativo."""
+    """Renderiza o retorno da IA em um formato de popup corporativo com botão de fechar."""
     st.markdown(f"""
-    <div class="modal-overlay">
+    <div class="modal-overlay" id="modal">
         <div class="modal-content">
-            <h2 style="color:#1e40af;">{titulo}</h2>
-            <hr>
-            <div style="color:#334155; line-height:1.6;">{conteudo}</div>
-            <p style="margin-top:20px; font-size:12px; color:#94a3b8;">Clique fora ou atualize para fechar.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color:#1e40af; margin: 0;">{titulo}</h2>
+                <button onclick="document.getElementById('modal').style.display='none'" 
+                        style="background: none; border: none; font-size: 30px; cursor: pointer; color: #64748b; line-height: 1;">
+                    &times;
+                </button>
+            </div>
+            <hr style="border: 0.5px solid #e2e8f0; margin-bottom: 20px;">
+            <div style="color:#334155; line-height:1.6; font-size: 15px;">
+                {conteudo.replace('\n', '<br>')}
+            </div>
+            <div style="margin-top:30px; padding-top: 15px; border-top: 1px solid #f1f5f9; text-align: right;">
+                <button onclick="document.getElementById('modal').style.display='none'" 
+                        style="background: #f1f5f9; border: none; padding: 8px 20px; border-radius: 8px; color: #475569; cursor: pointer; font-weight: 600;">
+                    Fechar Visualização
+                </button>
+            </div>
         </div>
     </div>
+    <script>
+        // Fecha o modal ao clicar na área escura (overlay)
+        var modal = document.getElementById('modal');
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
     """, unsafe_allow_html=True)
 
 # --- 3. DESIGN SYSTEM (LIGHT CORPORATE EXCLUSIVE - ULTRA CLEAN) ---
