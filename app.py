@@ -31,11 +31,11 @@ chaves_sessao = {
     },
     'analise_count': 0,
     'last_update': time.time(),
-    'login_time': time.time(),     # NOVO: Necessário para o Relatório de Uso
-    'uso_sessao': {},               # NOVO: Necessário para o Relatório de Uso
-    'mostrar_modal': False,        # NOVO: Necessário para o Popup funcionar
-    'conteudo_modal': "",          # NOVO: Armazena o texto da IA para o Popup
-    'titulo_modal': ""             # NOVO: Armazena o título do Popup
+    'login_time': time.time(),     # Registra o início da jornada
+    'uso_sessao': {},               # Armazena a contagem de cliques em funções
+    'mostrar_resultado': False,    # NOVO: Controla se o Card UX aparece na tela
+    'resultado_ia': "",            # NOVO: Armazena o texto gerado pela IA para o Card
+    'titulo_resultado': ""         # NOVO: Armazena o título do Card
 }
 
 for chave, valor in chaves_sessao.items():
@@ -445,6 +445,8 @@ elif "🏠 Centro" in escolha:
     c2.metric("Sessão", st.session_state.user_atual.capitalize(), "Protegida")
     c3.metric("DNA Ativo", st.session_state.perfil_cliente["nome_empresa"])
 
+# --- 7. MÓDULOS DE FUNCIONALIDADES (VERSÃO UX CARDS) ---
+
 # ANALISADOR MCKINSEY
 elif "📁 Analisador McKinsey" in escolha:
     st.markdown('<div class="main-card"><h2>📁 Analisador de Documentos McKinsey</h2><p>Auditoria técnica profunda sob o DNA estratégico da empresa.</p></div>', unsafe_allow_html=True)
@@ -460,17 +462,17 @@ elif "📁 Analisador McKinsey" in escolha:
             
             res_ia, mod_ia = call_technobolt_ai("Audite este documento focando em ROI e riscos.", dados_ia, system_context="mckinsey")
             
-            # Lógica de Popup Corrigida
-            st.session_state.titulo_modal = f"Auditoria McKinsey - {mod_ia}"
-            st.session_state.conteudo_modal = res_ia
-            st.session_state.mostrar_modal = True
+            # UX: Preenchimento do Card de Resultado
+            st.session_state.titulo_resultado = f"Auditoria McKinsey - {mod_ia}"
+            st.session_state.resultado_ia = res_ia
+            st.session_state.mostrar_resultado = True
             st.rerun()
 
 # EMAIL INTEL (LOTE)
 elif "📧 Email Intel" in escolha:
     st.markdown('<div class="main-card"><h2>📧 Email Intel: Auditoria em Lote</h2><p>Processamento massivo de e-mails para triagem executiva.</p></div>', unsafe_allow_html=True)
     emails = st.file_uploader("Upload Emails (PDF):", type=['pdf'], accept_multiple_files=True)
-    if emails and st.button("PROCESSAR LOTE DE AUDITORIA"):
+    if emails and st.button("PROCESSAR LOTE DE EMAILS"):
         registrar_evento("Email Intel (Lote)")
         with st.spinner("Auditando lote de mensagens..."):
             relatorio_lote = ""
@@ -478,9 +480,9 @@ elif "📧 Email Intel" in escolha:
                 res_email, _ = call_technobolt_ai("Resuma tecnicamente e rascunhe a resposta ideal.", [{"mime_type": "application/pdf", "data": email_pdf.read()}], system_context="email")
                 relatorio_lote += f"<h3>Email: {email_pdf.name}</h3>{res_email}<hr>"
             
-            st.session_state.titulo_modal = "Relatório de Auditoria em Lote"
-            st.session_state.conteudo_modal = relatorio_lote
-            st.session_state.mostrar_modal = True
+            st.session_state.titulo_resultado = "Relatório de Auditoria em Lote"
+            st.session_state.resultado_ia = relatorio_lote
+            st.session_state.mostrar_resultado = True
             st.rerun()
 
 # GERADOR DE EMAILS COM BARRA DE FORMALIDADE
@@ -493,15 +495,15 @@ elif "✉️ Gerador de Emails" in escolha:
                                    options=["Casual", "Corporativo", "Executivo", "Rígido/Diplomático"], 
                                    value="Executivo")
     contexto_e = st.text_area("Objetivo da Mensagem ou Tópicos Críticos:")
-    if st.button("GERAR E-MAIL EXECUTIVO"):
+    if st.button("GERAR E-MAIL"):
         registrar_evento("Gerador de Emails")
         with st.spinner("IA Redigindo..."):
             p_email = f"Como {cargo_e}, escreva um email para {dest_e} sobre {contexto_e}. Formalidade: {formalidade}."
             res_email, _ = call_technobolt_ai(p_email, system_context="email")
             
-            st.session_state.titulo_modal = "Rascunho Executivo Gerado"
-            st.session_state.conteudo_modal = res_email
-            st.session_state.mostrar_modal = True
+            st.session_state.titulo_resultado = "Rascunho Executivo Gerado"
+            st.session_state.resultado_ia = res_email
+            st.session_state.mostrar_resultado = True
             st.rerun()
 
 # BRIEFING ESTRATÉGICO
@@ -513,23 +515,23 @@ elif "🧠 Briefing" in escolha:
         with st.spinner("Escaneando mercado..."):
             res_brief, mod = call_technobolt_ai(f"Gere um briefing estratégico completo para {e_alvo}.", system_context="briefing")
             
-            st.session_state.titulo_modal = f"Briefing Estratégico - {e_alvo}"
-            st.session_state.conteudo_modal = res_brief
-            st.session_state.mostrar_modal = True
+            st.session_state.titulo_resultado = f"Briefing Estratégico - {e_alvo}"
+            st.session_state.resultado_ia = res_brief
+            st.session_state.mostrar_resultado = True
             st.rerun()
 
 # GESTOR DE ATAS COM RACI
 elif "📝 Gestor de Atas" in escolha:
     st.markdown('<div class="main-card"><h2>📝 Gestor de Atas de Governança</h2></div>', unsafe_allow_html=True)
     notas_r = st.text_area("Notas da Reunião ou Transcrição:", height=280)
-    if st.button("FORMALIZAR ATA DE DIRETORIA"):
+    if st.button("FORMALIZAR ATA"):
         registrar_evento("Gestor de Atas")
         with st.spinner("Formatando ata..."):
             res_ata, _ = call_technobolt_ai(f"Formalize as seguintes notas em Ata de Diretoria: {notas_r}", system_context="ata")
             
-            st.session_state.titulo_modal = "Ata de Diretoria Formalizada"
-            st.session_state.conteudo_modal = res_ata
-            st.session_state.mostrar_modal = True
+            st.session_state.titulo_resultado = "Ata de Diretoria Formalizada"
+            st.session_state.resultado_ia = res_ata
+            st.session_state.mostrar_resultado = True
             st.rerun()
 
 # MERCADO & CHURN
@@ -543,9 +545,9 @@ elif "📈 Mercado & Churn" in escolha:
             with st.spinner("Analisando concorrência..."):
                 res_r, _ = call_technobolt_ai(f"Análise competitiva profunda de: {rival_n}", system_context="briefing")
                 
-                st.session_state.titulo_modal = f"Radar de Concorrência: {rival_n}"
-                st.session_state.conteudo_modal = res_r
-                st.session_state.mostrar_modal = True
+                st.session_state.titulo_resultado = f"Radar de Concorrência: {rival_n}"
+                st.session_state.resultado_ia = res_r
+                st.session_state.mostrar_resultado = True
                 st.rerun()
     with tab_churn:
         feed_c = st.text_area("Feedback do Cliente para Análise de Risco:")
@@ -554,114 +556,58 @@ elif "📈 Mercado & Churn" in escolha:
             with st.spinner("Avaliando risco..."):
                 res_c, _ = call_technobolt_ai(f"Avalie o risco de churn baseado no feedback: {feed_c}")
                 
-                st.session_state.titulo_modal = "Diagnóstico de Risco (Churn)"
-                st.session_state.conteudo_modal = res_c
-                st.session_state.mostrar_modal = True
+                st.session_state.titulo_resultado = "Diagnóstico de Risco (Churn)"
+                st.session_state.resultado_ia = res_c
+                st.session_state.mostrar_resultado = True
                 st.rerun()
 
 # RELATÓRIO MASTER
 elif "📊 Relatório Master" in escolha:
     st.markdown('<div class="main-card"><h2>📊 Relatório Master de Diretoria</h2><p>Dossiê consolidado de KPIs e eventos da semana.</p></div>', unsafe_allow_html=True)
     kpis = st.text_area("Fatos, métricas e decisões da semana:")
-    if st.button("GERAR DOSSIÊ MASTER"):
+    if st.button("GERAR RELATÓRIO"):
         registrar_evento("Relatório Master")
         with st.spinner("Consolidando dados..."):
             res_master, _ = call_technobolt_ai(f"Gere um Relatório Master consolidando: {kpis}.", system_context="ata")
             
-            st.session_state.titulo_modal = "Relatório Master Consolidado"
-            st.session_state.conteudo_modal = res_master
-            st.session_state.mostrar_modal = True
+            st.session_state.titulo_resultado = "Relatório Master Consolidado"
+            st.session_state.resultado_ia = res_master
+            st.session_state.mostrar_resultado = True
             st.rerun()
 
 # --- 8. RODAPÉ DE GOVERNANÇA ---
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 st.caption(f"TechnoBolt Solutions © 2026 | Elite Hub Edition v1.0 | Operador: {st.session_state.user_atual.upper()}")
 
-# --- 9. RENDERIZAÇÃO DO MODAL (FINAL DO ARQUIVO - VERSÃO FIXADA) ---
-if st.session_state.get('mostrar_modal'):
-    # Sanitização extra para garantir que o Markdown da IA não quebre o HTML do modal
-    conteudo_html = st.session_state.conteudo_modal.replace('\n', '<br>').replace('"', '&quot;')
+# --- 9. COMPONENTE DE RESULTADO UX CENTRALIZADO ---
+if st.session_state.get('mostrar_resultado'):
+    st.markdown("---") # Divisor sutil
+    _, col_central, _ = st.columns([1, 8, 1]) # Centralização UX (Larga)
     
-    st.markdown(f"""
-    <div id="modal-overlay" style="
-        position: fixed; 
-        top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(15, 23, 42, 0.95); 
-        z-index: 9999999; /* Valor ultra alto para ficar na frente de tudo */
-        display: flex; justify-content: center; align-items: center; 
-        margin: 0; padding: 0;">
-        
-        <div id="modal-box" style="
-            background: white; 
-            padding: 40px; 
-            border-radius: 20px;
-            width: 90%; 
-            max-width: 850px; 
-            max-height: 85vh; 
-            overflow-y: auto;
-            position: relative; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            border: 1px solid #e2e8f0;
-            animation: modalIn 0.3s ease-out;">
-            
-            <div onclick="window.location.reload();" style="
-                position: sticky; 
-                float: right;
-                top: -20px; 
-                right: -10px; 
-                font-size: 45px; 
-                cursor: pointer; 
-                color: #94a3b8; 
-                line-height: 0.5; 
-                font-weight: 300;
-                z-index: 10000000;
-                background: white;
-                border-radius: 50%;
-                width: 40px; height: 40px;
-                display: flex; align-items: center; justify-content: center;
-                ">&times;</div>
-            
-            <h2 style="color:#1e40af; margin-top: 0; padding-right: 50px; font-family: 'Inter', sans-serif;">
-                {st.session_state.titulo_modal}
-            </h2>
-            <hr style="border: 0.5px solid #f1f5f9; margin-bottom: 25px;">
-            
-            <div style="color:#334155; line-height:1.7; font-size: 16px; text-align: left; font-family: 'Inter', sans-serif;">
-                {conteudo_html}
+    with col_central:
+        st.markdown(f"""
+            <div class="main-card" style="border-top: 5px solid #1e40af; animation: fadeIn 0.5s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #1e40af; margin: 0;">{st.session_state.titulo_resultado}</h2>
+                    <div style="background: #eff6ff; color: #1e40af; padding: 5px 15px; border-radius: 8px; font-size: 12px; font-weight: 700;">
+                        ANÁLISE CONCLUÍDA
+                    </div>
+                </div>
+                <div style="color: #334155; line-height: 1.8; font-size: 16px; background: #fdfdfd; padding: 25px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                    {st.session_state.resultado_ia.replace('\n', '<br>')}
+                </div>
             </div>
-            
-            <div style="margin-top: 40px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 20px;">
-                <button onclick="window.location.reload();" style="
-                    background: #1e40af; color: white; border: none; 
-                    padding: 14px 40px; border-radius: 12px; cursor: pointer;
-                    font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-                    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.4);">
-                    Finalizar Visualização
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        /* CSS para anular margens padrão do Streamlit que deformam o modal */
-        [data-testid="stHeader"], [data-testid="stSidebar"] {{ z-index: 0 !important; }}
-        .stApp {{ overflow: hidden !important; }} /* Evita scroll duplo */
+        """, unsafe_allow_html=True)
         
-        @keyframes modalIn {{ 
-            from {{ opacity: 0; transform: translateY(20px); }} 
-            to {{ opacity: 1; transform: translateY(0); }} 
-        }}
-    </style>
-
-    <script>
-        // Fechar ao clicar fora (no fundo escuro)
-        document.getElementById('modal-overlay').onclick = function(e) {{
-            if (e.target.id === 'modal-overlay') window.location.reload();
-        }};
-        
-        // Fechar no ESC
-        document.addEventListener('keydown', function(e) {{
-            if (e.key === "Escape") window.location.reload();
-        }}, {{once: true}});
-    </script>
-    """, unsafe_allow_html=True)
+        # Botões de Ação Pós-Análise
+        c1, c2, c3 = st.columns([2, 2, 2])
+        with c1:
+            if st.button("📥 BAIXAR DOCX", key="btn_dl"):
+                # O export_docx já está no seu código
+                doc_buf = export_docx(st.session_state.titulo_resultado, st.session_state.resultado_ia)
+                st.download_button("CONFIRMAR DOWNLOAD", data=doc_buf, file_name="analise_technobolt.docx")
+        with c3:
+            if st.button("✖️ LIMPAR E FECHAR", key="btn_close"):
+                st.session_state.mostrar_resultado = False
+                st.session_state.resultado_ia = ""
+                st.rerun()
