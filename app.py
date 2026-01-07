@@ -29,13 +29,18 @@ chaves_sessao = {
         "tom_voz": "Executivo, Autoritário e Analítico"
     },
     'analise_count': 0,
-    'last_update': time.time()
+    'last_update': time.time(),
+    'login_time': time.time(),     # NOVO: Necessário para o Relatório de Uso
+    'uso_sessao': {},               # NOVO: Necessário para o Relatório de Uso
+    'mostrar_modal': False,        # NOVO: Necessário para o Popup funcionar
+    'conteudo_modal': "",          # NOVO: Armazena o texto da IA para o Popup
+    'titulo_modal': ""             # NOVO: Armazena o título do Popup
 }
 
 for chave, valor in chaves_sessao.items():
     if chave not in st.session_state:
         st.session_state[chave] = valor
-
+        
 def protocol_logout():
     """Gera relatório de uso e finaliza a sessão."""
     tempo_logado = round((time.time() - st.session_state.login_time) / 60, 2)
