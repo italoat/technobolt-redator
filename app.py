@@ -1,10 +1,13 @@
 import streamlit as st
+import smtplib
 import google.generativeai as genai
 import os
 import time
 import docx  # Requer: pip install python-docx
 from io import BytesIO
 import base64
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # --- 1. CONFIGURAÇÃO DE SEGURANÇA E PROTOCOLO (ELITE HUB) ---
 st.set_page_config(
@@ -34,10 +37,60 @@ for chave, valor in chaves_sessao.items():
         st.session_state[chave] = valor
 
 def protocol_logout():
-    """Finaliza a sessão e limpa os estados de segurança do operador."""
+    """Gera relatório de uso e finaliza a sessão."""
+    tempo_logado = round((time.time() - st.session_state.login_time) / 60, 2)
+    relatorio_uso = f"""
+    Relatório de Uso - Usuário: {st.session_state.user_atual}
+    Tempo Total: {tempo_logado} minutos.
+    Ações realizadas: {st.session_state.uso_sessao}
+    """
+    enviar_notificacao_email("Relatório de Uso", relatorio_uso)
+    
     st.session_state.logged_in = False
     st.session_state.user_atual = None
     st.rerun()
+
+def enviar_notificacao_email(assunto, corpo):
+    """Envia notificações reais via SMTP Gmail."""
+    remetente = "technoboltconsultoria@gmail.com"
+    destinatario = "technoboltconsultoria@gmail.com"
+    # IMPORTANTE: Gere uma "Senha de App" no Google e coloque abaixo
+    senha_app = "uxagfbfemjmvawun" 
+
+    msg = MIMEMultipart()
+    msg['From'] = remetente
+    msg['To'] = destinatario
+    msg['Subject'] = assunto
+    msg.attach(MIMEText(corpo, 'plain'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(remetente, senha_app)
+        text = msg.as_string()
+        server.sendmail(remetente, destinatario, text)
+        server.quit()
+    except Exception as e:
+        st.error(f"Erro ao disparar e-mail de governança: {e}")
+
+def registrar_evento(funcao):
+    """Rastreia quais funções o usuário utilizou durante a sessão."""
+    if 'uso_sessao' not in st.session_state:
+        st.session_state.uso_sessao = {}
+    st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
+
+def mostrar_popup(titulo, conteudo):
+    """Renderiza o retorno da IA em um formato de popup corporativo."""
+    st.markdown(f"""
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="color:#1e40af;">{titulo}</h2>
+            <hr>
+            <div style="color:#334155; line-height:1.6;">{conteudo}</div>
+            <p style="margin-top:20px; font-size:12px; color:#94a3b8;">Clique fora ou atualize para fechar.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # --- 3. DESIGN SYSTEM (LIGHT CORPORATE EXCLUSIVE - ULTRA CLEAN) ---
 st.markdown("""
@@ -160,6 +213,21 @@ st.markdown("""
         display: flex; justify-content: center; align-items: center; 
         margin: 20px 0; border-radius: 20px; overflow: hidden;
     }
+       .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.7); display: flex;
+        justify-content: center; align-items: center; z-index: 9999;
+    }
+    .modal-content {
+        background: white; padding: 40px; border-radius: 24px;
+        max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative;
+    }
+    .close-modal {
+        position: absolute; top: 20px; right: 20px; cursor: pointer;
+        font-size: 24px; font-weight: bold; color: #64748b;
+    }     
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -180,11 +248,14 @@ def render_auth():
             if user_id in banco_users and banco_users[user_id] == user_key:
                 st.session_state.logged_in = True
                 st.session_state.user_atual = user_id
+                st.session_state.login_time = time.time()
+                st.session_state.uso_sessao = {} # Inicia rastreio
+                
+                # Relatório de Login
+                agora = time.strftime('%H:%M:%S do dia %d/%m/%Y')
+                enviar_notificacao_email("Relatório de Login", f"Usuário {user_id} acessou o sistema às {agora}.")
+                
                 st.rerun()
-            else:
-                st.error("Protocolo negado. Credenciais inválidas.")
-        st.markdown("<p style='text-align:center; color:#94a3b8; font-size:10px; margin-top:45px;'>SISTEMA PROTEGIDO POR AES-256</p>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 if not st.session_state.logged_in:
     render_auth()
@@ -361,6 +432,7 @@ elif "📁 Analisador McKinsey" in escolha:
     st.markdown('<div class="main-card"><h2>📁 Analisador de Documentos McKinsey</h2><p>Auditoria técnica profunda sob o DNA estratégico da empresa.</p></div>', unsafe_allow_html=True)
     arquivo_up = st.file_uploader("Submeter Documento (PDF/DOCX/TXT):", type=['pdf', 'docx', 'txt'])
     if arquivo_up and st.button("REVISAR"):
+        registrar_evento("Analisador McKinsey")
         with st.spinner("IA Processando sob padrão McKinsey de excelência..."):
             if arquivo_up.type == "application/pdf":
                 dados_ia = [{"mime_type": "application/pdf", "data": arquivo_up.read()}]
@@ -369,8 +441,7 @@ elif "📁 Analisador McKinsey" in escolha:
                 dados_ia = [texto_raw]
             
             res_ia, mod_ia = call_technobolt_ai("Audite este documento focando em ROI e riscos.", dados_ia, system_context="mckinsey")
-            st.markdown(f"<p style='font-size:10px; color:#64748b;'>Processado via: {mod_ia}</p>", unsafe_allow_html=True)
-            st.markdown(res_ia)
+            mostrar_popup(f"Auditoria McKinsey - {mod_ia}", res_ia)
             st.download_button("📥 Baixar Relatório", data=export_docx("Auditoria McKinsey", res_ia), file_name=f"Auditoria_{arquivo_up.name}.docx")
 
 # EMAIL INTEL (LOTE)
@@ -378,10 +449,13 @@ elif "📧 Email Intel" in escolha:
     st.markdown('<div class="main-card"><h2>📧 Email Intel: Auditoria em Lote</h2><p>Processamento massivo de e-mails para triagem executiva.</p></div>', unsafe_allow_html=True)
     emails = st.file_uploader("Upload Emails (PDF):", type=['pdf'], accept_multiple_files=True)
     if emails and st.button("PROCESSAR LOTE DE AUDITORIA"):
-        for email_pdf in emails:
-            with st.expander(f"Auditoria: {email_pdf.name}", expanded=True):
+        registrar_evento("Email Intel (Lote)")
+        with st.spinner("Auditando lote de mensagens..."):
+            relatorio_lote = ""
+            for email_pdf in emails:
                 res_email, _ = call_technobolt_ai("Resuma tecnicamente e rascunhe a resposta ideal.", [{"mime_type": "application/pdf", "data": email_pdf.read()}], system_context="email")
-                st.markdown(res_email)
+                relatorio_lote += f"<h3>Email: {email_pdf.name}</h3>{res_email}<hr>"
+            mostrar_popup("Relatório de Auditoria em Lote", relatorio_lote)
 
 # GERADOR DE EMAILS COM BARRA DE FORMALIDADE
 elif "✉️ Gerador de Emails" in escolha:
@@ -394,27 +468,33 @@ elif "✉️ Gerador de Emails" in escolha:
                                    value="Executivo")
     contexto_e = st.text_area("Objetivo da Mensagem ou Tópicos Críticos:")
     if st.button("GERAR E-MAIL EXECUTIVO"):
-        p_email = f"Como {cargo_e}, escreva um email para {dest_e} sobre {contexto_e}. Formalidade: {formalidade}."
-        res_email, _ = call_technobolt_ai(p_email, system_context="email")
-        st.markdown(f'<div class="main-card" style="max-width:100%;">{res_email}</div>', unsafe_allow_html=True)
-        st.download_button("📥 Baixar Word", data=export_docx("Email Gerado", res_email), file_name="Rascunho_Email.docx")
+        registrar_evento("Gerador de Emails")
+        with st.spinner("IA Redigindo..."):
+            p_email = f"Como {cargo_e}, escreva um email para {dest_e} sobre {contexto_e}. Formalidade: {formalidade}."
+            res_email, _ = call_technobolt_ai(p_email, system_context="email")
+            mostrar_popup("Rascunho Executivo Gerado", res_email)
+            st.download_button("📥 Baixar Word", data=export_docx("Email Gerado", res_email), file_name="Rascunho_Email.docx")
 
 # BRIEFING ESTRATÉGICO
 elif "🧠 Briefing" in escolha:
     st.markdown('<div class="main-card"><h2>🧠 Briefing Estratégico & Radar 2026</h2></div>', unsafe_allow_html=True)
     e_alvo = st.text_input("Empresa ou Setor para Análise de Inteligência:")
     if st.button("EXECUTAR BRIEFING ESTRATÉGICO"):
-        res_brief, _ = call_technobolt_ai(f"Gere um briefing estratégico completo para {e_alvo}.", system_context="briefing")
-        st.markdown(res_brief)
+        registrar_evento("Briefing Estratégico")
+        with st.spinner("Escaneando mercado..."):
+            res_brief, mod = call_technobolt_ai(f"Gere um briefing estratégico completo para {e_alvo}.", system_context="briefing")
+            mostrar_popup(f"Briefing Estratégico - {e_alvo}", res_brief)
 
 # GESTOR DE ATAS COM RACI
 elif "📝 Gestor de Atas" in escolha:
     st.markdown('<div class="main-card"><h2>📝 Gestor de Atas de Governança</h2></div>', unsafe_allow_html=True)
     notas_r = st.text_area("Notas da Reunião ou Transcrição:", height=280)
     if st.button("FORMALIZAR ATA DE DIRETORIA"):
-        res_ata, _ = call_technobolt_ai(f"Formalize as seguintes notas em Ata de Diretoria: {notas_r}", system_context="ata")
-        st.markdown(f'<div class="main-card" style="max-width:100%;">{res_ata}</div>', unsafe_allow_html=True)
-        st.download_button("📥 Baixar Ata Word", data=export_docx("Ata Oficial", res_ata), file_name="Ata_Oficial.docx")
+        registrar_evento("Gestor de Atas")
+        with st.spinner("Formatando ata..."):
+            res_ata, _ = call_technobolt_ai(f"Formalize as seguintes notas em Ata de Diretoria: {notas_r}", system_context="ata")
+            mostrar_popup("Ata de Diretoria Formalizada", res_ata)
+            st.download_button("📥 Baixar Ata Word", data=export_docx("Ata Oficial", res_ata), file_name="Ata_Oficial.docx")
 
 # MERCADO & CHURN
 elif "📈 Mercado & Churn" in escolha:
@@ -423,22 +503,28 @@ elif "📈 Mercado & Churn" in escolha:
     with tab_rival:
         rival_n = st.text_input("Empresa para Análise:")
         if st.button("ANALISAR ESTRATÉGIA"):
-            res_r, _ = call_technobolt_ai(f"Análise competitiva profunda de: {rival_n}", system_context="briefing")
-            st.markdown(res_r)
+            registrar_evento("Análise de Rival")
+            with st.spinner("Analisando concorrência..."):
+                res_r, _ = call_technobolt_ai(f"Análise competitiva profunda de: {rival_n}", system_context="briefing")
+                mostrar_popup(f"Radar de Concorrência: {rival_n}", res_r)
     with tab_churn:
         feed_c = st.text_area("Feedback do Cliente para Análise de Risco:");
         if st.button("CALCULAR RISCO DE PERDA"):
-            res_c, _ = call_technobolt_ai(f"Avalie o risco de churn baseado no feedback: {feed_c}")
-            st.markdown(res_c)
+            registrar_evento("Cálculo de Churn")
+            with st.spinner("Avaliando risco..."):
+                res_c, _ = call_technobolt_ai(f"Avalie o risco de churn baseado no feedback: {feed_c}")
+                mostrar_popup("Diagnóstico de Risco (Churn)", res_c)
 
 # RELATÓRIO MASTER
 elif "📊 Relatório Master" in escolha:
     st.markdown('<div class="main-card"><h2>📊 Relatório Master de Diretoria</h2><p>Dossiê consolidado de KPIs e eventos da semana.</p></div>', unsafe_allow_html=True)
     kpis = st.text_area("Fatos, métricas e decisões da semana:")
     if st.button("GERAR DOSSIÊ MASTER"):
-        res_master, _ = call_technobolt_ai(f"Gere um Relatório Master consolidando: {kpis}.", system_context="ata")
-        st.markdown(res_master)
-        st.download_button("📥 Baixar Relatório", data=export_docx("Relatório Master", res_master), file_name="Master_Dossie.docx")
+        registrar_evento("Relatório Master")
+        with st.spinner("Consolidando dados..."):
+            res_master, _ = call_technobolt_ai(f"Gere um Relatório Master consolidando: {kpis}.", system_context="ata")
+            mostrar_popup("Relatório Master Consolidado", res_master)
+            st.download_button("📥 Baixar Relatório", data=export_docx("Relatório Master", res_master), file_name="Master_Dossie.docx")
 
 # --- 8. RODAPÉ DE GOVERNANÇA ---
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
