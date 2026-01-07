@@ -51,10 +51,9 @@ def protocol_logout():
     st.rerun()
 
 def enviar_notificacao_email(assunto, corpo):
-    """Envia notificações reais via SMTP Gmail."""
+    """Envia notificações usando SSL na porta 465 (Alta compatibilidade)."""
     remetente = "technoboltconsultoria@gmail.com"
     destinatario = "technoboltconsultoria@gmail.com"
-    # IMPORTANTE: Gere uma "Senha de App" no Google e coloque abaixo
     senha_app = "uxagfbfemjmvawun" 
 
     msg = MIMEMultipart()
@@ -64,14 +63,22 @@ def enviar_notificacao_email(assunto, corpo):
     msg.attach(MIMEText(corpo, 'plain'))
 
     try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(remetente, senha_app)
-        text = msg.as_string()
-        server.sendmail(remetente, destinatario, text)
-        server.quit()
+        # SMTP_SSL é mais robusto para evitar bloqueios de firewall
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(remetente, senha_app)
+            server.send_message(msg)
+        return True
     except Exception as e:
-        st.error(f"Erro ao disparar e-mail de governança: {e}")
+        # Se falhar, tenta porta 587 como último recurso
+        try:
+            with smtplib.SMTP('smtp.gmail.com', 587) as server:
+                server.starttls()
+                server.login(remetente, senha_app)
+                server.send_message(msg)
+            return True
+        except Exception as e2:
+            st.error(f"Falha no envio de e-mail: {e2}")
+            return False
 
 def registrar_evento(funcao):
     """Rastreia quais funções o usuário utilizou durante a sessão."""
@@ -80,40 +87,34 @@ def registrar_evento(funcao):
     st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
 
 def mostrar_popup(titulo, conteudo):
-    """Renderiza o retorno da IA em um formato de popup corporativo com chaves escapadas para evitar SyntaxError."""
-    # Tratamento de quebras de linha para HTML
+    """Renderiza o popup com suporte a quebra de linha e fechamento via botão."""
     conteudo_html = conteudo.replace('\n', '<br>')
     
+    # Criamos um botão do próprio Streamlit para fechar, mudando um estado
+    if st.button("✖️ Fechar Visualização"):
+        st.rerun()
+
     st.markdown(f"""
-    <div class="modal-overlay" id="modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color:#1e40af; margin: 0;">{titulo}</h2>
-                <button onclick="document.getElementById('modal').style.display='none'" 
-                        style="background: none; border: none; font-size: 30px; cursor: pointer; color: #64748b; line-height: 1;">
-                    &times;
-                </button>
-            </div>
-            <hr style="border: 0.5px solid #e2e8f0; margin-bottom: 20px;">
-            <div style="color:#334155; line-height:1.6; font-size: 15px;">
+    <div style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.8); z-index: 9999;
+        display: flex; justify-content: center; align-items: center;
+        padding: 20px;">
+        <div style="
+            background: white; padding: 40px; border-radius: 20px;
+            max-width: 800px; width: 100%; max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative; border: 1px solid #e2e8f0;">
+            <h2 style="color:#1e40af; margin-top: 0;">{titulo}</h2>
+            <hr style="border: 0.5px solid #f1f5f9;">
+            <div style="color:#334155; line-height:1.6; font-size: 16px;">
                 {conteudo_html}
             </div>
-            <div style="margin-top:30px; padding-top: 15px; border-top: 1px solid #f1f5f9; text-align: right;">
-                <button onclick="document.getElementById('modal').style.display='none'" 
-                        style="background: #f1f5f9; border: none; padding: 8px 20px; border-radius: 8px; color: #475569; cursor: pointer; font-weight: 600;">
-                    Fechar Visualização
-                </button>
+            <div style="margin-top: 30px; text-align: center;">
+                <p style="font-size: 12px; color: #94a3b8;">Role para cima e clique no botão 'Fechar' do sistema para retornar.</p>
             </div>
         </div>
     </div>
-    <script>
-        var modal = document.getElementById('modal');
-        window.onclick = function(event) {{
-            if (event.target == modal) {{
-                modal.style.display = "none";
-            }}
-        }}
-    </script>
     """, unsafe_allow_html=True)
 
 # --- 3. DESIGN SYSTEM (LIGHT CORPORATE EXCLUSIVE - ULTRA CLEAN) ---
