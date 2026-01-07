@@ -624,54 +624,89 @@ elif "📊 Relatório Master" in escolha:
 st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 st.caption(f"TechnoBolt Solutions © 2026 | Elite Hub Edition v1.0 | Operador: {st.session_state.user_atual.upper()}")
 
-# --- 9. RENDERIZAÇÃO DO MODAL (FINAL DO ARQUIVO) ---
+# --- 9. RENDERIZAÇÃO DO MODAL (FINAL DO ARQUIVO - VERSÃO FIXADA) ---
 if st.session_state.get('mostrar_modal'):
-    conteudo_html = st.session_state.conteudo_modal.replace('\n', '<br>')
+    # Sanitização extra para garantir que o Markdown da IA não quebre o HTML do modal
+    conteudo_html = st.session_state.conteudo_modal.replace('\n', '<br>').replace('"', '&quot;')
     
     st.markdown(f"""
     <div id="modal-overlay" style="
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.9); z-index: 1000000;
-        display: flex; justify-content: center; align-items: center; padding: 20px;">
+        position: fixed; 
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(15, 23, 42, 0.95); 
+        z-index: 9999999; /* Valor ultra alto para ficar na frente de tudo */
+        display: flex; justify-content: center; align-items: center; 
+        margin: 0; padding: 0;">
         
         <div id="modal-box" style="
-            background: white; padding: 40px; border-radius: 20px;
-            max-width: 850px; width: 100%; max-height: 85vh; overflow-y: auto;
-            position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            border: 1px solid #e2e8f0; animation: modalIn 0.3s ease;">
+            background: white; 
+            padding: 40px; 
+            border-radius: 20px;
+            width: 90%; 
+            max-width: 850px; 
+            max-height: 85vh; 
+            overflow-y: auto;
+            position: relative; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border: 1px solid #e2e8f0;
+            animation: modalIn 0.3s ease-out;">
             
             <div onclick="window.location.reload();" style="
-                position: absolute; top: 15px; right: 20px; 
-                font-size: 35px; cursor: pointer; color: #94a3b8; 
-                line-height: 1; font-weight: bold;">&times;</div>
+                position: sticky; 
+                float: right;
+                top: -20px; 
+                right: -10px; 
+                font-size: 45px; 
+                cursor: pointer; 
+                color: #94a3b8; 
+                line-height: 0.5; 
+                font-weight: 300;
+                z-index: 10000000;
+                background: white;
+                border-radius: 50%;
+                width: 40px; height: 40px;
+                display: flex; align-items: center; justify-content: center;
+                ">&times;</div>
             
-            <h2 style="color:#1e40af; margin-top: 0; padding-right: 30px;">{st.session_state.titulo_modal}</h2>
+            <h2 style="color:#1e40af; margin-top: 0; padding-right: 50px; font-family: 'Inter', sans-serif;">
+                {st.session_state.titulo_modal}
+            </h2>
             <hr style="border: 0.5px solid #f1f5f9; margin-bottom: 25px;">
             
-            <div style="color:#334155; line-height:1.7; font-size: 16px; text-align: left;">
+            <div style="color:#334155; line-height:1.7; font-size: 16px; text-align: left; font-family: 'Inter', sans-serif;">
                 {conteudo_html}
             </div>
             
-            <div style="margin-top: 30px; text-align: center;">
+            <div style="margin-top: 40px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 20px;">
                 <button onclick="window.location.reload();" style="
                     background: #1e40af; color: white; border: none; 
-                    padding: 12px 30px; border-radius: 10px; cursor: pointer;
-                    font-weight: 600; text-transform: uppercase;">Fechar Visualização</button>
+                    padding: 14px 40px; border-radius: 12px; cursor: pointer;
+                    font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+                    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.4);">
+                    Finalizar Visualização
+                </button>
             </div>
         </div>
     </div>
 
     <style>
-        @keyframes modalIn {{ from {{ opacity: 0; transform: scale(0.95); }} to {{ opacity: 1; transform: scale(1); }} }}
-        /* Garante que o fundo do Streamlit não quebre o modal */
-        [data-testid="stHeader"] {{ z-index: 0 !important; }}
+        /* CSS para anular margens padrão do Streamlit que deformam o modal */
+        [data-testid="stHeader"], [data-testid="stSidebar"] {{ z-index: 0 !important; }}
+        .stApp {{ overflow: hidden !important; }} /* Evita scroll duplo */
+        
+        @keyframes modalIn {{ 
+            from {{ opacity: 0; transform: translateY(20px); }} 
+            to {{ opacity: 1; transform: translateY(0); }} 
+        }}
     </style>
 
     <script>
-        // Fechar ao clicar fora ou ESC
+        // Fechar ao clicar fora (no fundo escuro)
         document.getElementById('modal-overlay').onclick = function(e) {{
             if (e.target.id === 'modal-overlay') window.location.reload();
         }};
+        
+        // Fechar no ESC
         document.addEventListener('keydown', function(e) {{
             if (e.key === "Escape") window.location.reload();
         }}, {{once: true}});
