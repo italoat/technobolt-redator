@@ -68,22 +68,16 @@ def enviar_notificacao_email(assunto, corpo):
     msg.attach(MIMEText(corpo, 'plain'))
 
     try:
-        # SMTP_SSL é mais robusto para evitar bloqueios de firewall
+        # Forçamos o login e o envio via SSL porta 465
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(remetente, senha_app)
-            server.send_message(msg)
+            # Criamos a string do email corretamente
+            server.sendmail(remetente, destinatario, msg.as_string())
         return True
     except Exception as e:
-        # Se falhar, tenta porta 587 como último recurso
-        try:
-            with smtplib.SMTP('smtp.gmail.com', 587) as server:
-                server.starttls()
-                server.login(remetente, senha_app)
-                server.send_message(msg)
-            return True
-        except Exception as e2:
-            st.error(f"Falha no envio de e-mail: {e2}")
-            return False
+        # Log visual para você debugar se houver erro
+        st.sidebar.error(f"Erro SMTP: {e}")
+        return False
 
 def registrar_evento(funcao):
     """Rastreia quais funções o usuário utilizou durante a sessão."""
@@ -92,34 +86,52 @@ def registrar_evento(funcao):
     st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
 
 def mostrar_popup(titulo, conteudo):
-    """Renderiza o popup com suporte a quebra de linha e fechamento via botão."""
+    """Renderiza o popup com suporte a quebra de linha, ESC e fechar ao clicar fora."""
     conteudo_html = conteudo.replace('\n', '<br>')
     
-    # Criamos um botão do próprio Streamlit para fechar, mudando um estado
-    if st.button("✖️ Fechar Visualização"):
-        st.rerun()
-
     st.markdown(f"""
-    <div style="
+    <div id="popup-overlay" onclick="fecharPopup(event)" style="
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.8); z-index: 9999;
+        background: rgba(15, 23, 42, 0.85); z-index: 99999;
         display: flex; justify-content: center; align-items: center;
         padding: 20px;">
-        <div style="
+        
+        <div id="popup-content" style="
             background: white; padding: 40px; border-radius: 20px;
-            max-width: 800px; width: 100%; max-height: 80vh; overflow-y: auto;
+            max-width: 850px; width: 100%; max-height: 80vh; overflow-y: auto;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            position: relative; border: 1px solid #e2e8f0;">
-            <h2 style="color:#1e40af; margin-top: 0;">{titulo}</h2>
-            <hr style="border: 0.5px solid #f1f5f9;">
+            position: relative; border: 1px solid #e2e8f0;
+            animation: fadeIn 0.3s ease;">
+            
+            <div onclick="window.location.reload()" style="
+                position: absolute; top: 15px; right: 20px; 
+                font-size: 30px; cursor: pointer; color: #94a3b8; 
+                font-weight: bold;">&times;</div>
+            
+            <h2 style="color:#1e40af; margin-top: 0; padding-right: 30px;">{titulo}</h2>
+            <hr style="border: 0.5px solid #f1f5f9; margin-bottom: 20px;">
+            
             <div style="color:#334155; line-height:1.6; font-size: 16px;">
                 {conteudo_html}
             </div>
-            <div style="margin-top: 30px; text-align: center;">
-                <p style="font-size: 12px; color: #94a3b8;">Role para cima e clique no botão 'Fechar' do sistema para retornar.</p>
-            </div>
         </div>
     </div>
+
+    <script>
+        // Função para fechar ao clicar no fundo
+        function fecharPopup(e) {{
+            if (e.target.id === "popup-overlay") {{
+                window.location.reload();
+            }}
+        }}
+
+        // Escuta a tecla ESC
+        document.addEventListener('keydown', function(e) {{
+            if (e.key === "Escape") {{
+                window.location.reload();
+            }}
+        }}, {{once: true}});
+    </script>
     """, unsafe_allow_html=True)
 
 # --- 3. DESIGN SYSTEM (LIGHT CORPORATE EXCLUSIVE - ULTRA CLEAN) ---
@@ -257,7 +269,9 @@ st.markdown("""
         position: absolute; top: 20px; right: 20px; cursor: pointer;
         font-size: 24px; font-weight: bold; color: #64748b;
     }     
-
+[data-testid="stHeader"] { z-index: 0 !important; }
+    .stApp { z-index: 1; }
+            
 </style>
 """, unsafe_allow_html=True)
 
