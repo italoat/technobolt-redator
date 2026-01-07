@@ -41,20 +41,28 @@ chaves_sessao = {
 for chave, valor in chaves_sessao.items():
     if chave not in st.session_state:
         st.session_state[chave] = valor
-def salvar_ao_encerrar():
-    """Tenta enviar o relatório se a sessão cair ou o usuário sair."""
-    # Verificamos se havia um usuário logado mas agora a sessão foi resetada
-    if st.session_state.get('user_atual'):
-        tempo = round((time.time() - st.session_state.get('login_time', time.time())) / 60, 2)
-        acoes = st.session_state.get('uso_sessao', {})
-        relatorio = f"SESSÃO FINALIZADA\nUsuário: {st.session_state.user_atual}\nTempo: {tempo} min\nAções: {acoes}"
-        enviar_notificacao_email(f"Relatório de Encerramento - {st.session_state.user_atual}", relatorio)
 
-# Se o sistema detectar que o estado de login sumiu mas o nome do usuário ainda está no rastro
-if not st.session_state.logged_in and st.session_state.get('user_atual'):
-    salvar_ao_encerrar()
-    # Limpa o rastro para não enviar duplicado
+# --- LÓGICA DE RECUPERAÇÃO E RELATÓRIO PÓS-QUEDA ---
+if st.session_state.get('user_atual') and not st.session_state.get('logged_in'):
+    # Se existe um usuário mas não está logado, a página sofreu F5 ou a sessão expirou
+    tempo_logado = round((time.time() - st.session_state.get('login_time', time.time())) / 60, 2)
+    acoes = st.session_state.get('uso_sessao', {})
+    
+    if tempo_logado >= 0:
+        relatorio_queda = f"""
+        RELATÓRIO DE ENCERRAMENTO (SESSÃO INTERROMPIDA)
+        --------------------------------------------------
+        Operador: {st.session_state.user_atual}
+        Tempo de Atividade: {tempo_logado} minutos
+        Ações registradas: {acoes}
+        Data/Hora: {time.strftime('%d/%m/%Y %H:%M:%S')}
+        """
+        enviar_notificacao_email(f"Sessão Encerrada - {st.session_state.user_atual}", relatorio_queda)
+    
+    # Limpeza para evitar envios duplicados em cada refresh
     st.session_state.user_atual = None
+    st.session_state.uso_sessao = {}
+    
 
 def protocol_logout():
     """Gera o relatório manual e limpa o estado para o redirecionamento."""
@@ -99,54 +107,6 @@ def registrar_evento(funcao):
         st.session_state.uso_sessao = {}
     st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
 
-def mostrar_popup(titulo, conteudo):
-    """Renderiza o popup com suporte a quebra de linha, ESC e fechar ao clicar fora."""
-    conteudo_html = conteudo.replace('\n', '<br>')
-    
-    st.markdown(f"""
-    <div id="popup-overlay" onclick="fecharPopup(event)" style="
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.85); z-index: 99999;
-        display: flex; justify-content: center; align-items: center;
-        padding: 20px;">
-        
-        <div id="popup-content" style="
-            background: white; padding: 40px; border-radius: 20px;
-            max-width: 850px; width: 100%; max-height: 80vh; overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            position: relative; border: 1px solid #e2e8f0;
-            animation: fadeIn 0.3s ease;">
-            
-            <div onclick="window.location.reload()" style="
-                position: absolute; top: 15px; right: 20px; 
-                font-size: 30px; cursor: pointer; color: #94a3b8; 
-                font-weight: bold;">&times;</div>
-            
-            <h2 style="color:#1e40af; margin-top: 0; padding-right: 30px;">{titulo}</h2>
-            <hr style="border: 0.5px solid #f1f5f9; margin-bottom: 20px;">
-            
-            <div style="color:#334155; line-height:1.6; font-size: 16px;">
-                {conteudo_html}
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Função para fechar ao clicar no fundo
-        function fecharPopup(e) {{
-            if (e.target.id === "popup-overlay") {{
-                window.location.reload();
-            }}
-        }}
-
-        // Escuta a tecla ESC
-        document.addEventListener('keydown', function(e) {{
-            if (e.key === "Escape") {{
-                window.location.reload();
-            }}
-        }}, {{once: true}});
-    </script>
-    """, unsafe_allow_html=True)
 
 # --- 3. DESIGN SYSTEM (LIGHT CORPORATE EXCLUSIVE - ULTRA CLEAN) ---
 st.markdown("""
@@ -299,16 +259,9 @@ def render_auth():
         user_id = st.text_input("Identificador de Operador", placeholder="Usuário")
         user_key = st.text_input("Chave de Acesso Segura", type="password", placeholder="Senha")
         
-        if st.button("🚨 TESTAR DISPARO DE E-MAIL AGORA"):
-            st.write("Tentando disparar e-mail de teste...")
-            resultado = enviar_notificacao_email("TESTE MANUAL", "O botão de teste foi acionado com sucesso.")
-            if resultado:
-                st.success("O código executou o envio sem erros!")
-            else:
-                st.error("O código tentou enviar, mas a função retornou Falso.")
 
-        if st.button("AUTENTICAR NO HUB"):
-            banco_users = {"admin": "admin", "jackson.antonio": "teste@2025", "luiza.trovao": "teste@2025"}
+        if st.button("CONECTAR"):
+            banco_users = {"admin": "admin","anderson.bezerra": "teste@2025", "fabricio.felix": "teste@2025", "jackson.antonio": "teste@2025", "luiza.trovao": "teste@2025"}
             if user_id in banco_users and banco_users[user_id] == user_key:
                 st.session_state.logged_in = True
                 st.session_state.user_atual = user_id
