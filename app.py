@@ -80,7 +80,10 @@ def registrar_evento(funcao):
     st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
 
 def mostrar_popup(titulo, conteudo):
-    """Renderiza o retorno da IA em um formato de popup corporativo com botão de fechar."""
+    """Renderiza o retorno da IA em um formato de popup corporativo com chaves escapadas para evitar SyntaxError."""
+    # Tratamento de quebras de linha para HTML
+    conteudo_html = conteudo.replace('\n', '<br>')
+    
     st.markdown(f"""
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
@@ -93,7 +96,7 @@ def mostrar_popup(titulo, conteudo):
             </div>
             <hr style="border: 0.5px solid #e2e8f0; margin-bottom: 20px;">
             <div style="color:#334155; line-height:1.6; font-size: 15px;">
-                {conteudo.replace('\n', '<br>')}
+                {conteudo_html}
             </div>
             <div style="margin-top:30px; padding-top: 15px; border-top: 1px solid #f1f5f9; text-align: right;">
                 <button onclick="document.getElementById('modal').style.display='none'" 
@@ -104,13 +107,12 @@ def mostrar_popup(titulo, conteudo):
         </div>
     </div>
     <script>
-        // Fecha o modal ao clicar na área escura (overlay)
         var modal = document.getElementById('modal');
-        window.onclick = function(event) {
-            if (event.target == modal) {
+        window.onclick = function(event) {{
+            if (event.target == modal) {{
                 modal.style.display = "none";
-            }
-        }
+            }}
+        }}
     </script>
     """, unsafe_allow_html=True)
 
