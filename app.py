@@ -256,8 +256,8 @@ def render_auth():
         st.markdown("<h1 class='hero-title'>TECHNOBOLT HUB</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align:center; color:#64748b; margin-bottom:40px; letter-spacing:1px;'>SISTEMA DE GOVERNANÇA COGNITIVA</p>", unsafe_allow_html=True)
         
-        user_id = st.text_input("Identificador de Operador", placeholder="Usuário")
-        user_key = st.text_input("Chave de Acesso Segura", type="password", placeholder="Senha")
+        user_id = st.text_input("Operador", placeholder="Usuário")
+        user_key = st.text_input("Chave", type="password", placeholder="Senha")
         
 
         if st.button("CONECTAR"):
