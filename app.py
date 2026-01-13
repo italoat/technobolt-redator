@@ -64,32 +64,116 @@ def registrar_evento(funcao):
     if 'uso_sessao' not in st.session_state: st.session_state.uso_sessao = {}
     st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
 
-# --- 3. DESIGN SYSTEM (PREMIUM DARK EXCLUSIVE) ---
+# --- 3. DESIGN SYSTEM (PREMIUM DARK EXCLUSIVE - FORCED WHITE FONTS) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    html, body, [data-testid="stAppViewContainer"], .stApp { background-color: #000000 !important; color: #ffffff !important; font-family: 'Inter', sans-serif !important; }
+    
+    /* RESET GLOBAL PARA BRANCO */
+    html, body, [data-testid="stAppViewContainer"], .stApp, p, h1, h2, h3, h4, span, label, div { 
+        color: #ffffff !important; 
+        font-family: 'Inter', sans-serif !important; 
+    }
+    
+    html, body, [data-testid="stAppViewContainer"], .stApp { background-color: #000000 !important; }
     [data-testid="stHeader"], [data-testid="stSidebar"] { display: none !important; }
-    .main-card { background: linear-gradient(145deg, #0d0d0d, #1a1a1a); border: 1px solid #333; border-radius: 20px; padding: 40px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .hero-title { font-size: 38px; font-weight: 800; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; text-align: center; }
-    .stButton > button { width: 100%; border-radius: 12px; height: 3.5em; font-weight: 700; background: #3b82f6 !important; color: white !important; border: none !important; transition: 0.3s; }
-    .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3) !important; }
-    .result-card-unificado { background: #080808; border-left: 4px solid #3b82f6; border-radius: 12px; padding: 30px; border: 1px solid #1a1a1a; line-height: 1.7; }
-    .status-badge { padding: 4px 12px; border-radius: 50px; background: #111; color: #3b82f6; font-size: 11px; font-weight: 700; border: 1px solid #333; }
-    .stMetric { background: #0d0d0d; border: 1px solid #222; border-radius: 15px; padding: 15px; }
+
+    /* CARDS E FORMS ESCUROS */
+    .main-card { 
+        background: linear-gradient(145deg, #0d0d0d, #1a1a1a); 
+        border: 1px solid #333; 
+        border-radius: 20px; 
+        padding: 40px; 
+        margin-bottom: 25px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+    }
+
+    /* ESTILIZAÇÃO DE INPUTS, TEXTAREAS E SELECTS */
+    .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
+        background-color: #0d0d0d !important;
+        color: #ffffff !important;
+        border: 1px solid #333 !important;
+        border-radius: 12px !important;
+    }
+    
+    /* GARANTIR QUE O TEXTO DENTRO DOS INPUTS SEJA BRANCO */
+    input, textarea, select {
+        color: #ffffff !important;
+    }
+
+    .hero-title { 
+        font-size: 38px; 
+        font-weight: 800; 
+        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        letter-spacing: -1px; 
+        text-align: center; 
+    }
+
+    .stButton > button { 
+        width: 100%; 
+        border-radius: 12px; 
+        height: 3.5em; 
+        font-weight: 700; 
+        background: #3b82f6 !important; 
+        color: white !important; 
+        border: none !important; 
+        transition: 0.3s; 
+    }
+
+    .stButton > button:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3) !important; 
+    }
+
+    .result-card-unificado { 
+        background: #080808; 
+        border-left: 4px solid #3b82f6; 
+        border-radius: 12px; 
+        padding: 30px; 
+        border: 1px solid #1a1a1a; 
+        line-height: 1.7; 
+    }
+
+    .status-badge { 
+        padding: 4px 12px; 
+        border-radius: 50px; 
+        background: #111; 
+        color: #3b82f6 !important; 
+        font-size: 11px; 
+        font-weight: 700; 
+        border: 1px solid #333; 
+    }
+
+    .stMetric { 
+        background: #0d0d0d !important; 
+        border: 1px solid #222 !important; 
+        border-radius: 15px !important; 
+        padding: 15px !important; 
+    }
+    
+    /* FORÇAR LABEL DAS MÉTRICAS */
+    [data-testid="stMetricLabel"] p {
+        color: #888888 !important;
+    }
+    [data-testid="stMetricValue"] div {
+        color: #ffffff !important;
+    }
+
     header, footer { visibility: hidden !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- 4. MOTOR DE INTELIGÊNCIA ESPECIALIZADA COM RODÍZIO DE CHAVES ---
-MODEL_FAILOVER_LIST = ["models/gemini-2.0-flash", "models/gemini-1.5-pro", "models/gemini-1.5-flash"]
+# ATUALIZADO COM OS MOTORES SOLICITADOS
+MODEL_FAILOVER_LIST = ["models/gemini-3-flash-preview", "models/gemini-2.5-flash", "models/gemini-2.0-flash", "models/gemini-flash-latest"]
 
 def call_technobolt_ai(prompt, attachments=None, system_context="default"):
     # Coleta todas as chaves disponíveis (GEMINI_CHAVE_1 até 7)
     chaves = [os.environ.get(f"GEMINI_CHAVE_{i}") for i in range(1, 8)]
-    chaves = [k for k in chaves if k] # Filtra apenas as que existem
+    chaves = [k for k in chaves if k]
     
-    # Se não encontrar chaves no padrão novo, tenta a variável padrão única
     if not chaves:
         chave_unica = os.environ.get("GEMINI_API_KEY")
         if chave_unica: chaves = [chave_unica]
@@ -128,7 +212,6 @@ def call_technobolt_ai(prompt, attachments=None, system_context="default"):
     
     final_sys_instr = dna_context + contexts.get(system_context, contexts["default"])
     
-    # LÓGICA DE RODÍZIO: Tenta cada chave e, para cada chave, tenta cada modelo
     for idx, key in enumerate(chaves):
         try:
             genai.configure(api_key=key)
@@ -138,10 +221,10 @@ def call_technobolt_ai(prompt, attachments=None, system_context="default"):
                     payload = [prompt] + attachments if attachments else prompt
                     response = model.generate_content(payload)
                     return response.text, f"CHAVE {idx+1} - {model_name}"
-                except Exception as e:
-                    continue # Tenta o próximo modelo se este falhar
-        except Exception as e:
-            continue # Tenta a próxima chave se a configuração falhar
+                except:
+                    continue
+        except:
+            continue
 
     return "⚠️ Todos os motores e chaves estão offline ou com limite excedido.", "OFFLINE"
 
@@ -155,7 +238,6 @@ if not st.session_state.logged_in:
         user_id = st.text_input("Operador", placeholder="Usuário")
         user_key = st.text_input("Chave", type="password", placeholder="Senha")
         if st.button("CONECTAR"):
-            # Mantendo logins originais
             banco_users = {"admin": "admin","anderson.bezerra": "teste@2025", "fabricio.felix": "teste@2025", "jackson.antonio": "teste@2025", "luiza.trovao": "teste@2025"}
             if user_id in banco_users and banco_users[user_id] == user_key:
                 st.session_state.logged_in = True
