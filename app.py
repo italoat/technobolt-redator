@@ -260,10 +260,10 @@ if escolha == "Centro de Comando":
         <h3 style='color:#ffffff;'>Guia de Operação Estratégica</h3>
         <p style='color:#888; margin-bottom:20px;'>Selecione um módulo no menu lateral para iniciar.</p>
         <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>
-            <div style='background:#161616; padding:15px; border-radius:10px;'><b>DOCUMENTOS</b><br>Auditoria McKinsey exaustiva.</div>
-            <div style='background:#161616; padding:15px; border-radius:10px;'><b>E-MAILS</b><br>Triagem cognitiva de massa.</div>
-            <div style='background:#161616; padding:15px; border-radius:10px;'><b>GERADOR</b><br>Redação diplomática autoritária.</div>
-            <div style='background:#161616; padding:15px; border-radius:10px;'><b>BRIEFING</b><br>Inteligência competitiva PESTEL.</div>
+            <div style='background:#161616; padding:15px; border-radius:10px;'><b>ANÁLISE DE DOCUMENTOS</b><br>Retorna avaliação gerencial técnica.</div>
+            <div style='background:#161616; padding:15px; border-radius:10px;'><b>ANÁLISE DE E-MAILS</b><br>Triagem cognitiva de massa.</div>
+            <div style='background:#161616; padding:15px; border-radius:10px;'><b>GERADOR DE ATAS</b><br>Formalização B3 com RACI.</div>
+            <div style='background:#161616; padding:15px; border-radius:10px;'><b>BRIEFING NEGOCIAL</b><br>Scan competitivo PESTEL/Porter.</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -281,6 +281,78 @@ elif escolha == "Analisador de Documentos":
                     st.session_state.titulo_resultado = f"Auditoria McKinsey ({mot})"
                     st.session_state.mostrar_resultado = True
                     st.rerun()
+
+elif escolha == "Analisador de E-mails":
+    st.markdown("<div class='main-card'><h2>Analisador de E-mails</h2></div>", unsafe_allow_html=True)
+    with st.form("form_emails"):
+        lote = st.text_area("Cole aqui os blocos de e-mail para triagem:", height=250)
+        if st.form_submit_button("EXECUTAR TRIAGEM"):
+            with st.spinner("CCO analisando comunicações..."):
+                res, mot = call_technobolt_ai(lote, None, "email_intel")
+                st.session_state.resultado_ia = res
+                st.session_state.titulo_resultado = f"Triagem Executiva ({mot})"
+                st.session_state.mostrar_resultado = True
+                st.rerun()
+
+elif escolha == "Gerador de Emails":
+    st.markdown("<div class='main-card'><h2>Gerador de Emails de Elite</h2></div>", unsafe_allow_html=True)
+    with st.form("form_gen_mail"):
+        pauta = st.text_area("Descreva o assunto ou pauta do e-mail:")
+        if st.form_submit_button("GERAR REDAÇÃO"):
+            with st.spinner("Redigindo e-mail diplomático..."):
+                res, mot = call_technobolt_ai(f"Gere um email profissional sobre: {pauta}", None, "default")
+                st.session_state.resultado_ia = res
+                st.session_state.titulo_resultado = f"Email Redigido ({mot})"
+                st.session_state.mostrar_resultado = True
+                st.rerun()
+
+elif escolha == "Briefing Estratégico":
+    st.markdown("<div class='main-card'><h2>Briefing Estratégico</h2></div>", unsafe_allow_html=True)
+    with st.form("form_briefing"):
+        alvo = st.text_input("Empresa ou Setor para Análise:")
+        if st.form_submit_button("GERAR SCAN"):
+            with st.spinner("Coletando inteligência..."):
+                res, mot = call_technobolt_ai(f"Gere um briefing estratégico sobre: {alvo}", None, "briefing")
+                st.session_state.resultado_ia = res
+                st.session_state.titulo_resultado = f"Scan de Mercado: {alvo} ({mot})"
+                st.session_state.mostrar_resultado = True
+                st.rerun()
+
+elif escolha == "Gerador de Atas":
+    st.markdown("<div class='main-card'><h2>Gerador de Atas</h2></div>", unsafe_allow_html=True)
+    with st.form("form_atas"):
+        notas = st.text_area("Notas ou Transcrições da Reunião:", height=250)
+        if st.form_submit_button("FORMALIZAR ATA"):
+            with st.spinner("Estruturando Governança..."):
+                res, mot = call_technobolt_ai(notas, None, "ata")
+                st.session_state.resultado_ia = res
+                st.session_state.titulo_resultado = f"Ata de Diretoria ({mot})"
+                st.session_state.mostrar_resultado = True
+                st.rerun()
+
+elif escolha == "Mercado & Churn":
+    st.markdown("<div class='main-card'><h2>Inteligência de Mercado & Churn</h2></div>", unsafe_allow_html=True)
+    with st.form("form_churn"):
+        dados_cli = st.text_area("Feedbacks ou métricas de comportamento do cliente:")
+        if st.form_submit_button("CALCULAR RISCO"):
+            with st.spinner("Avaliando retenção..."):
+                res, mot = call_technobolt_ai(dados_cli, None, "churn")
+                st.session_state.resultado_ia = res
+                st.session_state.titulo_resultado = f"Análise de Retenção ({mot})"
+                st.session_state.mostrar_resultado = True
+                st.rerun()
+
+elif escolha == "Relatório Semanal":
+    st.markdown("<div class='main-card'><h2>Relatório Semanal de KPIs</h2></div>", unsafe_allow_html=True)
+    with st.form("form_semanal"):
+        kpis = st.text_area("Fatos, métricas e marcos da semana:")
+        if st.form_submit_button("CONSOLIDAR DOSSIÊ"):
+            with st.spinner("COO consolidando dados..."):
+                res, mot = call_technobolt_ai(kpis, None, "master")
+                st.session_state.resultado_ia = res
+                st.session_state.titulo_resultado = f"Dossiê Semanal ({mot})"
+                st.session_state.mostrar_resultado = True
+                st.rerun()
 
 # --- 9. EXIBIÇÃO DE RESULTADO ---
 if st.session_state.mostrar_resultado:
