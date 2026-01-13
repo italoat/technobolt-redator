@@ -126,18 +126,23 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* BOTÕES CINZA ESCURO (DARK GREY) */
-    .stButton > button {
-        width: 100%; border-radius: 8px; height: 3.2em; font-weight: 700;
-        background: #262626 !important; 
+    /* REFORÇO DOS BOTÕES (DARK GREY - CINZA ESCURO) */
+    .stButton > button, [data-testid="stDownloadButton"] button {
+        width: 100% !important;
+        border-radius: 8px !important;
+        height: 3.2em !important;
+        font-weight: 700 !important;
+        background-color: #262626 !important; 
         color: white !important; 
         border: 1px solid #444 !important;
-        transition: 0.4s;
+        transition: 0.4s !important;
     }
-    .stButton > button:hover {
-        background: #333333 !important;
+    
+    .stButton > button:hover, [data-testid="stDownloadButton"] button:hover {
+        background-color: #333333 !important;
         border-color: #555 !important;
         transform: translateY(-1px);
+        color: white !important;
     }
 
     /* RESULTADO IA */
@@ -278,7 +283,7 @@ elif escolha == "Analisador de Documentos":
                     dados = [{"mime_type": "application/pdf", "data": up.read()}] if up.type == "application/pdf" else [up.read().decode(errors='ignore')]
                     res, mot = call_technobolt_ai("Audite este documento.", dados, "mckinsey")
                     st.session_state.resultado_ia = res
-                    st.session_state.titulo_resultado = f"Auditoria McKinsey ({mot})"
+                    st.session_state.titulo_resultado = f"Documento Revisado"
                     st.session_state.mostrar_resultado = True
                     st.rerun()
 
@@ -290,7 +295,7 @@ elif escolha == "Analisador de E-mails":
             with st.spinner("CCO analisando comunicações..."):
                 res, mot = call_technobolt_ai(lote, None, "email_intel")
                 st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Triagem Executiva ({mot})"
+                st.session_state.titulo_resultado = f"Triagem Executiva"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
 
@@ -302,7 +307,7 @@ elif escolha == "Gerador de Emails":
             with st.spinner("Redigindo e-mail diplomático..."):
                 res, mot = call_technobolt_ai(f"Gere um email profissional sobre: {pauta}", None, "default")
                 st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Email Redigido ({mot})"
+                st.session_state.titulo_resultado = f"Email Redigido"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
 
@@ -314,7 +319,7 @@ elif escolha == "Briefing Estratégico":
             with st.spinner("Coletando inteligência..."):
                 res, mot = call_technobolt_ai(f"Gere um briefing estratégico sobre: {alvo}", None, "briefing")
                 st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Scan de Mercado: {alvo} ({mot})"
+                st.session_state.titulo_resultado = f"Scan de Mercado: {alvo}"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
 
@@ -326,7 +331,7 @@ elif escolha == "Gerador de Atas":
             with st.spinner("Estruturando Governança..."):
                 res, mot = call_technobolt_ai(notas, None, "ata")
                 st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Ata de Diretoria ({mot})"
+                st.session_state.titulo_resultado = f"Ata Formalizada"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
 
@@ -338,7 +343,7 @@ elif escolha == "Mercado & Churn":
             with st.spinner("Avaliando retenção..."):
                 res, mot = call_technobolt_ai(dados_cli, None, "churn")
                 st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Análise de Retenção ({mot})"
+                st.session_state.titulo_resultado = f"Análise de Retenção"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
 
@@ -346,11 +351,11 @@ elif escolha == "Relatório Semanal":
     st.markdown("<div class='main-card'><h2>Relatório Semanal de KPIs</h2></div>", unsafe_allow_html=True)
     with st.form("form_semanal"):
         kpis = st.text_area("Fatos, métricas e marcos da semana:")
-        if st.form_submit_button("CONSOLIDAR DOSSIÊ"):
+        if st.form_submit_button("CONSOLIDAR RELATÓRIO"):
             with st.spinner("COO consolidando dados..."):
                 res, mot = call_technobolt_ai(kpis, None, "master")
                 st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Dossiê Semanal ({mot})"
+                st.session_state.titulo_resultado = f"Relatório Semanal"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
 
