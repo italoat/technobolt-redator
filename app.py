@@ -34,7 +34,7 @@ for chave, valor in chaves_sessao.items():
     if chave not in st.session_state:
         st.session_state[chave] = valor
 
-# --- 3. DESIGN SYSTEM (ELITE DARK V2) ---
+# --- 3. DESIGN SYSTEM (ELITE DARK V2 + SIDEBAR FIX) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -46,12 +46,33 @@ st.markdown("""
         font-family: 'Inter', sans-serif !important;
     }
 
-    /* BARRA LATERAL (SIDEBAR) */
+    /* BARRA LATERAL (SIDEBAR) MODERNA */
     [data-testid="stSidebar"] {
         background-color: #0a0a0a !important;
         border-right: 1px solid #222;
     }
     
+    /* FORÇAR SETA DO MENU BRANCA (DESKTOP E MOBILE) */
+    button[data-testid="stSidebarCollapseButton"] svg {
+        fill: white !important;
+        color: white !important;
+    }
+    
+    /* ESTILO DOS BOTÕES DE RÁDIO NA SIDEBAR */
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
+        background-color: #111;
+        border: 1px solid #222;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        transition: 0.3s;
+    }
+    
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
+        border-color: #3b82f6;
+        background-color: #1a1a1a;
+    }
+
     /* FORÇAR TEXTO BRANCO EM TUDO */
     p, h1, h2, h3, h4, span, label, div, [data-testid="stMarkdownContainer"] p {
         color: #ffffff !important;
@@ -79,20 +100,23 @@ st.markdown("""
         border-radius: 12px;
         padding: 30px;
         margin-top: 20px;
-        border-top: 1px solid #333;
-        border-right: 1px solid #333;
-        border-bottom: 1px solid #333;
+        border: 1px solid #333;
     }
 
-    /* BOTÕES */
     .stButton > button {
         width: 100%; border-radius: 10px; height: 3.2em; font-weight: 700;
         background: #3b82f6 !important; color: white !important; border: none !important;
     }
 
-    .status-badge {
-        padding: 5px 15px; border-radius: 50px; background: #222;
-        color: #3b82f6 !important; font-size: 11px; font-weight: 700; border: 1px solid #333;
+    .hero-title { 
+        font-size: 38px; font-weight: 800; text-align: center;
+        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); 
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        margin-bottom: 20px;
+    }
+
+    .orientation-item {
+        background: #161616; padding: 15px; border-radius: 10px; border-left: 3px solid #3b82f6; margin-bottom: 10px;
     }
 
     header { visibility: hidden !important; }
@@ -102,9 +126,8 @@ st.markdown("""
 
 # --- 4. UTILITÁRIOS (LIMPEZA DE SÍMBOLOS) ---
 def limpar_formatacao(texto):
-    """Remove marcações excessivas de IA para o cliente final."""
     texto = texto.replace('**', '').replace('###', '').replace('##', '').replace('#', '')
-    texto = re.sub(r'\n{3,}', '\n\n', texto) # Remove quebras excessivas
+    texto = re.sub(r'\n{3,}', '\n\n', texto)
     return texto.strip()
 
 # --- 5. MOTOR DE IA (RODÍZIO E FAILOVER) ---
@@ -160,11 +183,11 @@ if not st.session_state.logged_in:
                     st.rerun()
     st.stop()
 
-# --- 7. NAVEGAÇÃO LATERAL (MENU COM SETA) ---
+# --- 7. NAVEGAÇÃO LATERAL ---
 with st.sidebar:
     st.markdown(f"""
-    <div style='text-align: center; padding: 20px;'>
-        <h2 style='color: #3b82f6; margin: 0;'>TECHNOBOLT</h2>
+    <div style='text-align: center; padding: 10px 0;'>
+        <h2 style='color: #3b82f6; margin: 0; font-size: 24px;'>TECHNOBOLT</h2>
         <p style='font-size: 10px; color: #555;'>GOVERNANÇA ELITE v2.0</p>
     </div>
     """, unsafe_allow_html=True)
@@ -172,15 +195,16 @@ with st.sidebar:
     st.markdown("---")
     
     escolha = st.radio(
-        "MÓDULOS ESTRATÉGICOS ➔",
+        "MÓDULOS ➔",
         ["🏠 Centro de Comando", "📁 Analisador de Documentos", "📧 Analisador de E-mails", 
          "✉️ Gerador de Emails", "🧠 Briefing Estratégico", "📝 Gerador de Atas", 
          "📈 Mercado & Churn", "📊 Relatório Semanal"],
         label_visibility="collapsed"
     )
     
-    st.markdown("<div style='height: 30vh;'></div>", unsafe_allow_html=True)
-    st.markdown(f"**Operador:** <span class='status-badge'>{st.session_state.user_atual.upper()}</span>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 25vh;'></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='background:#111; padding:15px; border-radius:10px; border:1px solid #222;'><b>Operador:</b><br><span style='color:#3b82f6;'>{st.session_state.user_atual.upper()}</span></div>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🚪 Encerrar Sessão"):
         st.session_state.logged_in = False
         st.rerun()
@@ -188,26 +212,34 @@ with st.sidebar:
 # --- 8. LÓGICA DE MÓDULOS ---
 
 if "🏠 Centro" in escolha:
-    st.markdown("<h1 class='hero-title'>Soberania Digital</h1>", unsafe_allow_html=True)
-    st.markdown("""<div class='main-card' style='text-align:center;'>
-        <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXlsaTYwaDZkeGc2MjMxcXk4MWJjMGtwcHEwNTZ6dHFkaXV0NzNxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/eljCVpMrhepUSgZaVP/giphy.gif" width="300">
-    </div>""", unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    c1.metric("Status IA", "Soberana")
-    c2.metric("DNA Ativo", st.session_state.perfil_cliente["nome_empresa"])
+    st.markdown("<h1 class='hero-title'>Painel de Governança</h1>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("""
+        <div class='main-card'>
+            <h3 style='color:#3b82f6;'>Guia de Operação Hub</h3>
+            <p style='color:#888;'>Selecione um módulo no menu lateral para iniciar o processamento de elite.</p>
+            <div class='orientation-item'><b>📁 Documentos:</b> Auditoria McKinsey profunda em arquivos PDF e DOCX.</div>
+            <div class='orientation-item'><b>📧 E-mails:</b> Triagem executiva (CCO) para grandes volumes de mensagens.</div>
+            <div class='orientation-item'><b>✉️ Gerador:</b> Redação diplomática de e-mails de alto impacto.</div>
+            <div class='orientation-item'><b>🧠 Briefing:</b> Scan de mercado e análise competitiva PESTEL/Porter.</div>
+            <div class='orientation-item'><b>📝 Atas:</b> Formalização de reuniões com Matriz RACI integrada.</div>
+            <div class='orientation-item'><b>📈 Churn:</b> Inteligência de dados para retenção de clientes críticos.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 elif "📁 Analisador" in escolha:
     st.markdown("<div class='main-card'><h2>📁 Analisador de Documentos</h2></div>", unsafe_allow_html=True)
     with st.form("form_docs"):
         up = st.file_uploader("Submeter PDF/DOCX", type=['pdf', 'docx'])
         if st.form_submit_button("EXECUTAR PROTOCOLO"):
-            with st.spinner("Auditando..."):
-                dados = [{"mime_type": "application/pdf", "data": up.read()}] if up.type == "application/pdf" else [up.read().decode(errors='ignore')]
-                res, mot = call_technobolt_ai("Audite este documento.", dados, "mckinsey")
-                st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Auditoria McKinsey ({mot})"
-                st.session_state.mostrar_resultado = True
-                st.rerun()
+            if up:
+                with st.spinner("Auditando..."):
+                    dados = [{"mime_type": "application/pdf", "data": up.read()}] if up.type == "application/pdf" else [up.read().decode(errors='ignore')]
+                    res, mot = call_technobolt_ai("Audite este documento.", dados, "mckinsey")
+                    st.session_state.resultado_ia = res
+                    st.session_state.titulo_resultado = f"Auditoria McKinsey ({mot})"
+                    st.session_state.mostrar_resultado = True
+                    st.rerun()
 
 elif "📧 Analisador" in escolha:
     st.markdown("<div class='main-card'><h2>📧 Analisador de E-mails</h2></div>", unsafe_allow_html=True)
@@ -231,26 +263,21 @@ elif "📝 Gerador de Atas" in escolha:
             st.session_state.mostrar_resultado = True
             st.rerun()
 
-# (Repetir lógica similar para os demais módulos seguindo o padrão de st.form cinza)
-
-# --- 9. EXIBIÇÃO DE RESULTADO (CARD CINZA LIMPO) ---
+# --- 9. EXIBIÇÃO DE RESULTADO ---
 if st.session_state.mostrar_resultado:
     st.markdown("---")
     _, mid, _ = st.columns([1, 8, 1])
     with mid:
-        # Sanitização do texto para exibição
         texto_limpo = limpar_formatacao(st.session_state.resultado_ia)
-        
         st.markdown(f"""
         <div class='result-card-elite'>
             <h2 style='color:#3b82f6 !important;'>{st.session_state.titulo_resultado}</h2>
-            <div style='color:#ccc !important; white-space: pre-wrap; font-size: 15px;'>
+            <div style='color:#eee !important; white-space: pre-wrap; font-size: 15px;'>
 {texto_limpo}
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Ações de Exportação
         c1, c2 = st.columns(2)
         if c1.button("📥 BAIXAR DOCX"):
             doc = docx.Document()
@@ -264,4 +291,4 @@ if st.session_state.mostrar_resultado:
 
 # --- 10. RODAPÉ ---
 st.markdown("<br><br>", unsafe_allow_html=True)
-st.caption(f"TechnoBolt Solutions © 2026 | Operador: {st.session_state.user_atual.upper()} | Hub Elite v2.0")
+st.caption(f"TechnoBolt Solutions © 2026 | Hub Elite v2.0")
