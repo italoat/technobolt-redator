@@ -34,12 +34,12 @@ for chave, valor in chaves_sessao.items():
     if chave not in st.session_state:
         st.session_state[chave] = valor
 
-# --- 3. DESIGN SYSTEM (ELITE CORPORATE UI) ---
+# --- 3. DESIGN SYSTEM (ELITE CORPORATE UI - DEEP DARK) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
-    /* RESET GLOBAL */
+    /* RESET GLOBAL E FUNDO */
     html, body, [data-testid="stAppViewContainer"], .stApp {
         background-color: #000000 !important;
         color: #ffffff !important;
@@ -61,24 +61,21 @@ st.markdown("""
         fill: white !important;
     }
 
-    /* MENU LATERAL PROFISSIONAL (SEM CÍRCULOS E COM TAMANHO PADRÃO) */
+    /* MENU LATERAL PROFISSIONAL (SEM CÍRCULOS E PADRONIZADO) */
     [data-testid="stSidebar"] .stRadio div[role="radiogroup"] {
         gap: 2px;
     }
-
-    /* Esconde o círculo de seleção */
     [data-testid="stSidebar"] div[role="radiogroup"] input {
         display: none !important;
     }
-
     [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
         background-color: #111;
         border: 1px solid #222;
         padding: 0px 20px !important;
         border-radius: 6px;
         margin-bottom: 4px;
-        color: #888 !important;
-        height: 48px !important; /* Tamanho padrão */
+        color: #ffffff !important;
+        height: 48px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: flex-start !important;
@@ -86,32 +83,24 @@ st.markdown("""
         cursor: pointer;
         width: 100% !important;
     }
-
-    /* Item selecionado e Hover */
-    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-baseweb="radio"] {
-        margin-left: 0px !important;
-    }
-
     [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
         border-color: #444;
         background-color: #1a1a1a;
-        color: #ffffff !important;
     }
-
-    /* Estilo para o item que está selecionado (Streamlit usa um div interno para marcar) */
     [data-testid="stSidebar"] .stRadio div[role="radiogroup"] div[data-testid="stMarkdownContainer"] p {
         font-size: 13px !important;
         font-weight: 500 !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        color: #ffffff !important;
     }
 
-    /* FORÇAR TEXTO BRANCO */
+    /* FORÇAR TEXTO BRANCO EM TUDO */
     p, h1, h2, h3, h4, span, label, div, [data-testid="stMarkdownContainer"] p, input, textarea {
         color: #ffffff !important;
     }
 
-    /* FORMULÁRIOS E INPUTS CINZA ESCURO */
+    /* FORMULÁRIOS E INPUTS CINZA CARVÃO (ELIMINANDO BRANCOS) */
     [data-testid="stForm"], .main-card {
         background-color: #111111 !important;
         border: 1px solid #333 !important;
@@ -119,11 +108,22 @@ st.markdown("""
         padding: 25px !important;
     }
 
+    /* COMPONENTES DE SELEÇÃO E TEXTO */
     .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
         background-color: #1a1a1a !important;
         border: 1px solid #333 !important;
         border-radius: 8px !important;
         color: white !important;
+    }
+
+    /* CORREÇÃO DO ÁREA DE UPLOAD (DRAG AND DROP) */
+    [data-testid="stFileUploader"] section {
+        background-color: #111111 !important;
+        border: 1px dashed #444 !important;
+        border-radius: 10px;
+    }
+    [data-testid="stFileUploader"] section div {
+        color: #ffffff !important;
     }
 
     /* BOTÕES CINZA ESCURO (DARK GREY) */
@@ -134,7 +134,6 @@ st.markdown("""
         border: 1px solid #444 !important;
         transition: 0.4s;
     }
-
     .stButton > button:hover {
         background: #333333 !important;
         border-color: #555 !important;
@@ -156,7 +155,6 @@ st.markdown("""
         background: linear-gradient(135deg, #ffffff 0%, #444444 100%); 
         -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
         margin-bottom: 25px;
-        letter-spacing: -1px;
     }
 
     footer { visibility: hidden !important; }
@@ -233,7 +231,6 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Lista de opções sem ícones
     menu_opcoes = [
         "Centro de Comando", 
         "Analisador de Documentos", 
