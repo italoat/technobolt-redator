@@ -85,8 +85,8 @@ st.markdown("""
 MODEL_FAILOVER_LIST = ["models/gemini-2.0-flash", "models/gemini-1.5-pro", "models/gemini-1.5-flash"]
 
 def call_technobolt_ai(prompt, attachments=None, system_context="default"):
-    # Coleta todas as chaves disponíveis (GEMINI_CHAVE_1 até 10)
-    chaves = [os.environ.get(f"GEMINI_CHAVE_{i}") for i in range(1, 11)]
+    # Coleta todas as chaves disponíveis (GEMINI_CHAVE_1 até 7)
+    chaves = [os.environ.get(f"GEMINI_CHAVE_{i}") for i in range(1, 8)]
     chaves = [k for k in chaves if k] # Filtra apenas as que existem
     
     # Se não encontrar chaves no padrão novo, tenta a variável padrão única
@@ -177,7 +177,7 @@ menu_navegacao = [
     "📧  Analisador de E-mails", 
     "✉️ Gerador de Emails", 
     "🧠 Briefing Estratégico", 
-    "📝 Gestor de Atas", 
+    "📝 Gerador de Atas", 
     "📈 Mercado & Churn", 
     "📊 Relatório Semanal"
 ]
@@ -246,7 +246,7 @@ elif "🧠 Briefing" in escolha:
             st.session_state.mostrar_resultado = True
             st.rerun()
 
-elif "📝 Gestor de Atas" in escolha:
+elif "📝 Gerador de Atas" in escolha:
     st.markdown('<div class="main-card"><h2>📝 Gestor de Atas de Governança</h2></div>', unsafe_allow_html=True)
     notas = st.text_area("Notas da Reunião:", height=200)
     if st.button("FORMALIZAR ATA"):
