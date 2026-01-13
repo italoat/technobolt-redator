@@ -64,7 +64,7 @@ def registrar_evento(funcao):
     if 'uso_sessao' not in st.session_state: st.session_state.uso_sessao = {}
     st.session_state.uso_sessao[funcao] = st.session_state.uso_sessao.get(funcao, 0) + 1
 
-# --- 3. DESIGN SYSTEM (PREMIUM DARK EXCLUSIVE - FORCED WHITE FONTS) ---
+# --- 3. DESIGN SYSTEM (PREMIUM DARK EXCLUSIVE - ADJUSTED BARS & FORMS) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -88,12 +88,36 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
     }
 
-    /* ESTILIZAÇÃO DE INPUTS, TEXTAREAS E SELECTS */
-    .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
+    /* AJUSTE DO FUNDO DOS FORMS */
+    [data-testid="stForm"] {
         background-color: #0d0d0d !important;
+        border: 1px solid #333 !important;
+        border-radius: 20px !important;
+        padding: 20px !important;
+    }
+
+    /* ESTILIZAÇÃO DE INPUTS, TEXTAREAS E SELECTS (BARRA DE TAREFAS/LISTA SUSPENSA) */
+    .stTextInput input, .stTextArea textarea, .stSelectbox [data-baseweb="select"] {
+        background-color: #1a1a1a !important;
         color: #ffffff !important;
         border: 1px solid #333 !important;
         border-radius: 12px !important;
+    }
+
+    /* REMOVER BRANCO DA LISTA SUSPENSA (OPTIONS) */
+    div[data-baseweb="popover"] > div, ul[role="listbox"] {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border: 1px solid #333 !important;
+    }
+    
+    li[role="option"] {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    
+    li[role="option"]:hover {
+        background-color: #3b82f6 !important;
     }
     
     /* GARANTIR QUE O TEXTO DENTRO DOS INPUTS SEJA BRANCO */
@@ -166,14 +190,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 4. MOTOR DE INTELIGÊNCIA ESPECIALIZADA COM RODÍZIO DE CHAVES ---
-# ATUALIZADO COM OS MOTORES SOLICITADOS
 MODEL_FAILOVER_LIST = ["models/gemini-3-flash-preview", "models/gemini-2.5-flash", "models/gemini-2.0-flash", "models/gemini-flash-latest"]
 
 def call_technobolt_ai(prompt, attachments=None, system_context="default"):
-    # Coleta todas as chaves disponíveis (GEMINI_CHAVE_1 até 7)
     chaves = [os.environ.get(f"GEMINI_CHAVE_{i}") for i in range(1, 8)]
     chaves = [k for k in chaves if k]
-    
     if not chaves:
         chave_unica = os.environ.get("GEMINI_API_KEY")
         if chave_unica: chaves = [chave_unica]
@@ -221,10 +242,8 @@ def call_technobolt_ai(prompt, attachments=None, system_context="default"):
                     payload = [prompt] + attachments if attachments else prompt
                     response = model.generate_content(payload)
                     return response.text, f"CHAVE {idx+1} - {model_name}"
-                except:
-                    continue
-        except:
-            continue
+                except: continue
+        except: continue
 
     return "⚠️ Todos os motores e chaves estão offline ou com limite excedido.", "OFFLINE"
 
