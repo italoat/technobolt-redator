@@ -126,23 +126,25 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* REFORÇO DOS BOTÕES (DARK GREY - CINZA ESCURO) */
-    .stButton > button, [data-testid="stDownloadButton"] button {
+    /* REFORÇO DOS BOTÕES (FIX: SEMPRE CINZA ESCURO) */
+    .stButton > button, [data-testid="stDownloadButton"] button, button[kind="secondaryFormSubmit"], button[kind="primaryFormSubmit"] {
         width: 100% !important;
         border-radius: 8px !important;
         height: 3.2em !important;
         font-weight: 700 !important;
-        background-color: #262626 !important; 
-        color: white !important; 
+        background: #262626 !important; /* Cor cinza escuro padrão */
+        background-color: #262626 !important;
+        color: #ffffff !important; 
         border: 1px solid #444 !important;
         transition: 0.4s !important;
     }
     
     .stButton > button:hover, [data-testid="stDownloadButton"] button:hover {
+        background: #333333 !important; /* Cor um pouco mais clara no hover */
         background-color: #333333 !important;
         border-color: #555 !important;
         transform: translateY(-1px);
-        color: white !important;
+        color: #ffffff !important;
     }
 
     /* RESULTADO IA */
@@ -267,7 +269,7 @@ if escolha == "Centro de Comando":
         <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>
             <div style='background:#161616; padding:15px; border-radius:10px;'><b>ANÁLISE DE DOCUMENTOS</b><br>Retorna avaliação gerencial técnica.</div>
             <div style='background:#161616; padding:15px; border-radius:10px;'><b>ANÁLISE DE E-MAILS</b><br>Triagem cognitiva de massa.</div>
-            <div style='background:#161616; padding:15px; border-radius:10px;'><b>GERADOR DE ATAS</b><br>Formalização B3 com RACI.</div>
+            <div style='background:#161616; padding:15px; border-radius:10px;'><b>GERADOR DE ATAS</b><br>Formalização de Ata com RACI.</div>
             <div style='background:#161616; padding:15px; border-radius:10px;'><b>BRIEFING NEGOCIAL</b><br>Scan competitivo PESTEL/Porter.</div>
         </div>
     </div>
@@ -300,10 +302,10 @@ elif escolha == "Analisador de E-mails":
                 st.rerun()
 
 elif escolha == "Gerador de Emails":
-    st.markdown("<div class='main-card'><h2>Gerador de Emails de Elite</h2></div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-card'><h2>Gerador de Emails</h2></div>", unsafe_allow_html=True)
     with st.form("form_gen_mail"):
         pauta = st.text_area("Descreva o assunto ou pauta do e-mail:")
-        if st.form_submit_button("GERAR REDAÇÃO"):
+        if st.form_submit_button("GERAR EMAIL"):
             with st.spinner("Redigindo e-mail diplomático..."):
                 res, mot = call_technobolt_ai(f"Gere um email profissional sobre: {pauta}", None, "default")
                 st.session_state.resultado_ia = res
