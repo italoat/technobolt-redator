@@ -69,46 +69,44 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
-    /* RESET GLOBAL PARA BRANCO */
-    html, body, [data-testid="stAppViewContainer"], .stApp, p, h1, h2, h3, h4, span, label, div { 
-        color: #ffffff !important; 
-        font-family: 'Inter', sans-serif !important; 
+    /* RESET GLOBAL E FUNDO */
+    html, body, [data-testid="stAppViewContainer"], .stApp {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        font-family: 'Inter', sans-serif !important;
     }
     
-    html, body, [data-testid="stAppViewContainer"], .stApp { background-color: #000000 !important; }
+    /* FORÇAR COR DA FONTE EM TODOS OS ELEMENTOS */
+    p, h1, h2, h3, h4, span, label, div { 
+        color: #ffffff !important; 
+    }
+
     [data-testid="stHeader"], [data-testid="stSidebar"] { display: none !important; }
 
-    /* CARDS E FORMS ESCUROS */
+    /* CARDS E FORMS */
     .main-card { 
         background: linear-gradient(145deg, #0d0d0d, #1a1a1a); 
         border: 1px solid #333; 
         border-radius: 20px; 
         padding: 40px; 
         margin-bottom: 25px; 
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
     }
 
-    /* AJUSTE DO FUNDO DOS FORMS */
-    [data-testid="stForm"] {
-        background-color: #0d0d0d !important;
+    /* CORREÇÃO DA LISTA SUSPENSA (SELECTBOX) E DROPDOWN */
+    .stSelectbox [data-baseweb="select"] {
+        background-color: #1a1a1a !important;
         border: 1px solid #333 !important;
-        border-radius: 20px !important;
-        padding: 20px !important;
     }
 
-    /* ESTILIZAÇÃO DE INPUTS, TEXTAREAS E SELECTS (BARRA DE TAREFAS/LISTA SUSPENSA) */
-    .stTextInput input, .stTextArea textarea, .stSelectbox [data-baseweb="select"] {
+    /* ESTILO DO MENU QUE ABRE (POPOVER) */
+    div[data-baseweb="popover"] > div {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
         border: 1px solid #333 !important;
-        border-radius: 12px !important;
     }
-
-    /* REMOVER BRANCO DA LISTA SUSPENSA (OPTIONS) */
-    div[data-baseweb="popover"] > div, ul[role="listbox"] {
+    
+    ul[role="listbox"] {
         background-color: #1a1a1a !important;
-        color: #ffffff !important;
-        border: 1px solid #333 !important;
     }
     
     li[role="option"] {
@@ -119,70 +117,40 @@ st.markdown("""
     li[role="option"]:hover {
         background-color: #3b82f6 !important;
     }
-    
-    /* GARANTIR QUE O TEXTO DENTRO DOS INPUTS SEJA BRANCO */
-    input, textarea, select {
+
+    /* CORREÇÃO DO ÁREA DE UPLOAD (DRAG AND DROP) */
+    [data-testid="stFileUploader"] section {
+        background-color: #0d0d0d !important;
+        border: 1px dashed #333 !important;
         color: #ffffff !important;
+    }
+    
+    [data-testid="stFileUploader"] section div {
+        color: #ffffff !important;
+    }
+
+    /* INPUTS E TEXTAREAS */
+    .stTextInput input, .stTextArea textarea {
+        background-color: #0d0d0d !important;
+        color: #ffffff !important;
+        border: 1px solid #333 !important;
+        border-radius: 12px !important;
     }
 
     .hero-title { 
-        font-size: 38px; 
-        font-weight: 800; 
+        font-size: 38px; font-weight: 800; text-align: center;
         background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); 
-        -webkit-background-clip: text; 
-        -webkit-text-fill-color: transparent; 
-        letter-spacing: -1px; 
-        text-align: center; 
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
     }
 
     .stButton > button { 
-        width: 100%; 
-        border-radius: 12px; 
-        height: 3.5em; 
-        font-weight: 700; 
-        background: #3b82f6 !important; 
-        color: white !important; 
-        border: none !important; 
-        transition: 0.3s; 
-    }
-
-    .stButton > button:hover { 
-        transform: translateY(-2px); 
-        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3) !important; 
+        width: 100%; border-radius: 12px; height: 3.5em; font-weight: 700;
+        background: #3b82f6 !important; color: white !important; border: none !important;
     }
 
     .result-card-unificado { 
-        background: #080808; 
-        border-left: 4px solid #3b82f6; 
-        border-radius: 12px; 
-        padding: 30px; 
-        border: 1px solid #1a1a1a; 
-        line-height: 1.7; 
-    }
-
-    .status-badge { 
-        padding: 4px 12px; 
-        border-radius: 50px; 
-        background: #111; 
-        color: #3b82f6 !important; 
-        font-size: 11px; 
-        font-weight: 700; 
-        border: 1px solid #333; 
-    }
-
-    .stMetric { 
-        background: #0d0d0d !important; 
-        border: 1px solid #222 !important; 
-        border-radius: 15px !important; 
-        padding: 15px !important; 
-    }
-    
-    /* FORÇAR LABEL DAS MÉTRICAS */
-    [data-testid="stMetricLabel"] p {
-        color: #888888 !important;
-    }
-    [data-testid="stMetricValue"] div {
-        color: #ffffff !important;
+        background: #080808; border-left: 4px solid #3b82f6; 
+        border-radius: 12px; padding: 30px; border: 1px solid #1a1a1a; 
     }
 
     header, footer { visibility: hidden !important; }
