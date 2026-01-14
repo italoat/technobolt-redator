@@ -117,15 +117,19 @@ def limpar_formatacao(texto):
     return texto.strip()
 
 def persistir_interacao(modulo, input_data, output_text, kpis_json):
-    log = {
-        "usuario": st.session_state.user_atual,
-        "timestamp": datetime.now(),
-        "modulo": modulo,
-        "input": str(input_data)[:500],
-        "output": output_text[:1000],
-        "kpis": kpis_json
-    }
-    db["governanca_logs"].insert_one(log)
+    if db is not None:  # PROTEÇÃO ESSENCIAL
+        try:
+            log = {
+                "usuario": st.session_state.user_atual,
+                "timestamp": datetime.now(),
+                "modulo": modulo,
+                "input": str(input_data)[:500],
+                "output": output_text[:1000],
+                "kpis": kpis_json
+            }
+            db["governanca_logs"].insert_one(log)
+        except Exception as e:
+            print(f"Erro ao salvar log: {e}")
 
 def validar_usuario(username):
     if not username: return False
@@ -283,29 +287,26 @@ elif escolha == "Analisador de Documentos":
                     st.session_state.mostrar_resultado = True
                     st.rerun()
 
-elif escolha == "Analisador de E-mails":
-    st.markdown("<div class='main-card'><h2>Analisador de E-mails</h2></div>", unsafe_allow_html=True)
-    with st.form("form_emails"):
-        lote = st.text_area("Cole aqui os blocos de e-mail para triagem:", height=250)
-        if st.form_submit_button("EXECUTAR TRIAGEM"):
-            with st.spinner("CCO analisando comunicações..."):
-                res, mot = call_technobolt_ai(lote, None, "email_intel")
-                st.session_state.resultado_ia = res
-                st.session_state.titulo_resultado = f"Triagem Executiva ({mot})"
-                st.session_state.mostrar_resultado = True
-                st.rerun()
-
 elif escolha == "Gerador de Emails":
     st.markdown("<div class='main-card'><h2>Gerador de Emails</h2></div>", unsafe_allow_html=True)
     with st.form("form_gen_mail"):
         pauta = st.text_area("Descreva o assunto ou pauta do e-mail:")
         if st.form_submit_button("GERAR EMAIL"):
             with st.spinner("Redigindo e-mail diplomático..."):
+                # call_technobolt_ai já chama persistir_interacao internamente
                 res, mot = call_technobolt_ai(f"Gere um email profissional sobre: {pauta}", None, "default")
                 st.session_state.resultado_ia = res
                 st.session_state.titulo_resultado = f"Email Redigido ({mot})"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
+    
+    # Visualização de Histórico Específico
+    if db is not None:
+        st.markdown("### 🕒 Últimas comunicações")
+        hist = list(db["governanca_logs"].find({"modulo": "default", "usuario": st.session_state.user_atual}).sort("timestamp", -1).limit(3))
+        for h in hist:
+            with st.expander(f"E-mail de {h['timestamp'].strftime('%d/%m - %H:%M')}"):
+                st.write(h['output'])
 
 elif escolha == "Briefing Estratégico":
     st.markdown("<div class='main-card'><h2>Briefing Estratégico</h2></div>", unsafe_allow_html=True)
