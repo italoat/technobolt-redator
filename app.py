@@ -69,42 +69,69 @@ for chave, valor in chaves_sessao.items():
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    /* Global Dark Background */
     html, body, [data-testid="stAppViewContainer"], .stApp {
         background-color: #000000 !important;
         color: #ffffff !important;
         font-family: 'Inter', sans-serif !important;
     }
+
+    /* Sidebar Fix */
     [data-testid="stSidebar"] { background-color: #0a0a0a !important; border-right: 1px solid #222; }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0) !important; color: white !important; }
-    button[data-testid="stSidebarCollapseButton"] svg { fill: white !important; }
-    [data-testid="stSidebar"] div[role="radiogroup"] input { display: none !important; }
-    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
-        background-color: #111; border: 1px solid #222; padding: 0px 20px !important;
-        border-radius: 6px; margin-bottom: 4px; color: #ffffff !important;
-        height: 48px !important; display: flex !important; align-items: center !important;
-        justify-content: flex-start !important; transition: 0.3s; cursor: pointer; width: 100% !important;
+
+    /* Forçar todos os textos para branco */
+    p, h1, h2, h3, h4, span, label, div, [data-testid="stMarkdownContainer"] p { color: #ffffff !important; }
+
+    /* FORMS: Corrigir fundo branco */
+    [data-testid="stForm"] {
+        background-color: #111111 !important; 
+        border: 1px solid #333 !important;
+        border-radius: 12px !important; 
+        padding: 25px !important;
     }
-    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover { border-color: #444; background-color: #1a1a1a; }
-    p, h1, h2, h3, h4, span, label, div, [data-testid="stMarkdownContainer"] p, input, textarea { color: #ffffff !important; }
-    [data-testid="stForm"], .main-card {
-        background-color: #111111 !important; border: 1px solid #333 !important;
-        border-radius: 12px !important; padding: 25px !important;
+
+    /* INPUTS & SELECTS: Corrigir fundo branco */
+    .stTextInput input, .stTextArea textarea, [data-baseweb="select"] > div, .stSelectbox div {
+        background-color: #1a1a1a !important; 
+        border: 1px solid #444 !important;
+        border-radius: 8px !important; 
+        color: #ffffff !important;
     }
-    .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
-        background-color: #1a1a1a !important; border: 1px solid #333 !important;
-        border-radius: 8px !important; color: white !important;
-    }
+
+    /* BUTTONS: Corrigir botão ficando branco fora do hover */
     .stButton > button {
-        width: 100% !important; border-radius: 8px !important; height: 3.2em !important;
-        font-weight: 700 !important; background: #262626 !important; color: #ffffff !important; 
-        border: 1px solid #444 !important; transition: 0.4s !important;
+        width: 100% !important; 
+        border-radius: 8px !important; 
+        height: 3.2em !important;
+        font-weight: 700 !important; 
+        background-color: #222222 !important; /* Cor sólida quando parado */
+        color: #ffffff !important; 
+        border: 1px solid #444 !important; 
+        transition: 0.3s ease-in-out !important;
     }
-    .stButton > button:hover { background: #333333 !important; border-color: #555 !important; }
+
+    .stButton > button:hover { 
+        background-color: #333333 !important; 
+        border-color: #666 !important;
+        color: #ffffff !important;
+    }
+
+    /* Cards de Resultado */
+    .main-card {
+        background-color: #111111 !important; 
+        border: 1px solid #333 !important;
+        border-radius: 12px !important; 
+        padding: 25px !important;
+    }
+
     .hero-title { 
         font-size: 32px; font-weight: 800; text-align: center;
         background: linear-gradient(135deg, #ffffff 0%, #444444 100%); 
         -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 25px;
     }
+    
     footer { visibility: hidden !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -234,6 +261,7 @@ if not st.session_state.logged_in:
                 else:
                     st.error("Não é possível solicitar acesso com o banco offline.")
     st.stop()
+
 # --- 8. NAVEGAÇÃO E PAYWALL ---
 with st.sidebar:
     st.markdown(f"<h2 style='color:#ffffff; text-align:center;'>TECHNOBOLT</h2>", unsafe_allow_html=True)
@@ -267,7 +295,13 @@ if escolha == "Centro de Comando":
         logs = list(db["governanca_logs"].find({"usuario": st.session_state.user_atual}).sort("timestamp", -1).limit(10))
         if logs:
             c1, c2, c3 = st.columns(3)
-            # ... (seu código de métricas continua igual)
+            riscos = sum([l.get("kpis", {}).get("riscos_count", 0) for l in logs])
+            alertas = sum([l.get("kpis", {}).get("prazos_alerta", 0) for l in logs])
+            c1.metric("Riscos Identificados", riscos)
+            c2.metric("Prazos Críticos", alertas)
+            c3.metric("Ações Recentes", len(logs))
+            df = pd.DataFrame([{"Data": l["timestamp"], "Riscos": l.get("kpis", {}).get("riscos_count", 0)} for l in logs])
+            st.line_chart(df.set_index("Data"))
         else:
             st.info("Execute análises para popular o dashboard estratégico.")
     else:
@@ -286,6 +320,7 @@ elif escolha == "Analisador de Documentos":
                     st.session_state.titulo_resultado = f"Auditoria McKinsey ({mot})"
                     st.session_state.mostrar_resultado = True
                     st.rerun()
+
 elif escolha == "Analisador de E-mails":
     st.markdown("<div class='main-card'><h2>Analisador de E-mails</h2></div>", unsafe_allow_html=True)
     with st.form("form_emails"):
@@ -293,9 +328,7 @@ elif escolha == "Analisador de E-mails":
         if st.form_submit_button("EXECUTAR TRIAGEM"):
             if lote.strip():
                 with st.spinner("CCO analisando comunicações..."):
-                    # O motor de IA já chama persistir_interacao internamente
                     res, mot = call_technobolt_ai(lote, None, "email_intel")
-                    
                     st.session_state.resultado_ia = res
                     st.session_state.titulo_resultado = f"Triagem Executiva ({mot})"
                     st.session_state.mostrar_resultado = True
@@ -303,7 +336,6 @@ elif escolha == "Analisador de E-mails":
             else:
                 st.warning("⚠️ Forneça o conteúdo dos e-mails para processamento.")
 
-    # Seção de Histórico de Inteligência (Blindada contra erro de conexão)
     if db is not None:
         st.markdown("### 📥 Histórico de Triagens Recentes")
         try:
@@ -328,14 +360,12 @@ elif escolha == "Gerador de Emails":
         pauta = st.text_area("Descreva o assunto ou pauta do e-mail:")
         if st.form_submit_button("GERAR EMAIL"):
             with st.spinner("Redigindo e-mail diplomático..."):
-                # call_technobolt_ai já chama persistir_interacao internamente
                 res, mot = call_technobolt_ai(f"Gere um email profissional sobre: {pauta}", None, "default")
                 st.session_state.resultado_ia = res
                 st.session_state.titulo_resultado = f"Email Redigido ({mot})"
                 st.session_state.mostrar_resultado = True
                 st.rerun()
     
-    # Visualização de Histórico Específico
     if db is not None:
         st.markdown("### 🕒 Últimas comunicações")
         hist = list(db["governanca_logs"].find({"modulo": "default", "usuario": st.session_state.user_atual}).sort("timestamp", -1).limit(3))
@@ -393,42 +423,25 @@ elif escolha == "Relatório Semanal":
 
 elif escolha == "Gestão de Acesso" and (st.session_state.user_atual == "admin" or st.session_state.is_admin):
     st.markdown("## 🔐 Governança de Acessos")
-    
     if db is not None:
         usuarios_lista = list(db["usuarios"].find())
-        
         for u_data in usuarios_lista:
-            # USO SEGURO DO .get(): Se não achar o campo, usa um valor padrão
             user_nome = u_data.get('usuario', 'Usuário Sem Nome')
             user_plano = u_data.get('plano', 'Standard')
             user_status = u_data.get('status', 'inativo')
             is_user_admin = u_data.get('is_admin', False)
-            
-            perfil_md = f"""
-            ### Operador: `{user_nome}` {' [ADMIN]' if is_user_admin else ''}
-            ---
-            - **Plano Atual:** {user_plano}
-            - **Status:** {user_status}
-            """
+            perfil_md = f"### Operador: `{user_nome}` {' [ADMIN]' if is_user_admin else ''}\n---\n- **Plano Atual:** {user_plano}\n- **Status:** {user_status}"
             st.markdown(perfil_md)
-            
             col_p, col_s, col_adm = st.columns([1, 1, 1])
-            
             with col_p:
-                # O index precisa bater com a lista, então garantimos que o plano atual exista nela
                 lista_planos = ["Standard", "Advanced", "Executive"]
-                try:
-                    idx_plano = lista_planos.index(user_plano)
-                except ValueError:
-                    idx_plano = 0
-                
+                try: idx_plano = lista_planos.index(user_plano)
+                except ValueError: idx_plano = 0
                 new_p = st.selectbox("Mudar Plano", lista_planos, index=idx_plano, key=f"plan_{user_nome}")
-            
             with col_s:
                 lista_status = ["ativo", "inativo"]
                 idx_status = 0 if user_status == "ativo" else 1
                 new_s = st.selectbox("Mudar Status", lista_status, index=idx_status, key=f"stat_{user_nome}")
-            
             with col_adm:
                 st.markdown("<br>", unsafe_allow_html=True)
                 if not is_user_admin:
@@ -436,19 +449,13 @@ elif escolha == "Gestão de Acesso" and (st.session_state.user_atual == "admin" 
                         db["usuarios"].update_one({"usuario": user_nome}, {"$set": {"is_admin": True}})
                         st.success(f"{user_nome} agora é Admin.")
                         st.rerun()
-                else:
-                    st.info("Acesso Admin")
-
+                else: st.info("Acesso Admin")
             if st.button("Aplicar Alterações", key=f"save_{user_nome}"):
-                db["usuarios"].update_one(
-                    {"usuario": user_nome}, 
-                    {"$set": {"plano": new_p, "status": new_s}}
-                )
+                db["usuarios"].update_one({"usuario": user_nome}, {"$set": {"plano": new_p, "status": new_s}})
                 st.success(f"Dossiê de {user_nome} atualizado.")
                 st.rerun()
             st.markdown("---")
-    else:
-        st.error("Banco de dados inacessível para gestão de contas.")
+    else: st.error("Banco de dados inacessível.")
 
 # --- 10. EXIBIÇÃO DE RESULTADOS ---
 if st.session_state.mostrar_resultado:
