@@ -357,37 +357,62 @@ elif escolha == "Relatório Semanal":
 
 elif escolha == "Gestão de Acesso" and (st.session_state.user_atual == "admin" or st.session_state.is_admin):
     st.markdown("## 🔐 Governança de Acessos")
-    usuarios_lista = list(db["usuarios"].find())
-    for u_data in usuarios_lista:
-        is_user_admin = u_data.get('is_admin', False)
-        perfil_md = f"""
-        ### Operador: `{u_data['usuario']}` {' [ADMIN]' if is_user_admin else ''}
-        ---
-        - **Plano Atual:** {u_data['plano']}
-        - **Status:** {u_data['status']}
-        """
-        st.markdown(perfil_md)
-        col_p, col_s, col_adm = st.columns([1, 1, 1])
-        with col_p:
-            new_p = st.selectbox("Mudar Plano", ["Standard", "Advanced", "Executive"], index=["Standard", "Advanced", "Executive"].index(u_data['plano']), key=f"plan_{u_data['usuario']}")
-        with col_s:
-            new_s = st.selectbox("Mudar Status", ["ativo", "inativo"], index=["ativo", "inativo"].index(u_data['status']), key=f"stat_{u_data['usuario']}")
-        with col_adm:
-            st.markdown("<br>", unsafe_allow_html=True)
-            # AJUSTE: Botão para tornar administrador
-            if not is_user_admin:
-                if st.button("Promover a Administrador", key=f"make_adm_{u_data['usuario']}"):
-                    db["usuarios"].update_one({"usuario": u_data["usuario"]}, {"$set": {"is_admin": True}})
-                    st.success(f"{u_data['usuario']} agora possui privilégios de Admin.")
-                    st.rerun()
-            else:
-                st.info("Já possui acesso Admin.")
+    
+    if db is not None:
+        usuarios_lista = list(db["usuarios"].find())
+        
+        for u_data in usuarios_lista:
+            # USO SEGURO DO .get(): Se não achar o campo, usa um valor padrão
+            user_nome = u_data.get('usuario', 'Usuário Sem Nome')
+            user_plano = u_data.get('plano', 'Standard')
+            user_status = u_data.get('status', 'inativo')
+            is_user_admin = u_data.get('is_admin', False)
+            
+            perfil_md = f"""
+            ### Operador: `{user_nome}` {' [ADMIN]' if is_user_admin else ''}
+            ---
+            - **Plano Atual:** {user_plano}
+            - **Status:** {user_status}
+            """
+            st.markdown(perfil_md)
+            
+            col_p, col_s, col_adm = st.columns([1, 1, 1])
+            
+            with col_p:
+                # O index precisa bater com a lista, então garantimos que o plano atual exista nela
+                lista_planos = ["Standard", "Advanced", "Executive"]
+                try:
+                    idx_plano = lista_planos.index(user_plano)
+                except ValueError:
+                    idx_plano = 0
+                
+                new_p = st.selectbox("Mudar Plano", lista_planos, index=idx_plano, key=f"plan_{user_nome}")
+            
+            with col_s:
+                lista_status = ["ativo", "inativo"]
+                idx_status = 0 if user_status == "ativo" else 1
+                new_s = st.selectbox("Mudar Status", lista_status, index=idx_status, key=f"stat_{user_nome}")
+            
+            with col_adm:
+                st.markdown("<br>", unsafe_allow_html=True)
+                if not is_user_admin:
+                    if st.button("Promover a Administrador", key=f"make_adm_{user_nome}"):
+                        db["usuarios"].update_one({"usuario": user_nome}, {"$set": {"is_admin": True}})
+                        st.success(f"{user_nome} agora é Admin.")
+                        st.rerun()
+                else:
+                    st.info("Acesso Admin")
 
-        if st.button("Aplicar Alterações de Plano/Status", key=f"save_{u_data['usuario']}"):
-            db["usuarios"].update_one({"usuario": u_data["usuario"]}, {"$set": {"plano": new_p, "status": new_s}})
-            st.success(f"Dossiê de {u_data['usuario']} atualizado.")
-            st.rerun()
-        st.markdown("---")
+            if st.button("Aplicar Alterações", key=f"save_{user_nome}"):
+                db["usuarios"].update_one(
+                    {"usuario": user_nome}, 
+                    {"$set": {"plano": new_p, "status": new_s}}
+                )
+                st.success(f"Dossiê de {user_nome} atualizado.")
+                st.rerun()
+            st.markdown("---")
+    else:
+        st.error("Banco de dados inacessível para gestão de contas.")
 
 # --- 10. EXIBIÇÃO DE RESULTADOS ---
 if st.session_state.mostrar_resultado:
