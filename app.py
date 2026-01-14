@@ -21,9 +21,19 @@ st.set_page_config(
 # --- 2. CONEXÃO MONGODB (RENDER CONFIG) ---
 @st.cache_resource
 def iniciar_conexao():
-    uri = os.environ.get("MONGO_URI", "mongodb://localhost:27017")
-    client = MongoClient(uri)
-    return client["technobolthub"]
+def iniciar_conexao():
+    try:
+        user = os.environ.get("MONGO_USER", "technobolt")
+        password_raw = os.environ.get("MONGO_PASS", "tech@132")
+        host = os.environ.get("MONGO_HOST", "cluster0.zbjsvk6.mongodb.net")
+        password = urllib.parse.quote_plus(password_raw)
+        uri = f"mongodb+srv://{user}:{password}@{host}/?appName=Cluster0"
+        client = MongoClient(uri, serverSelectionTimeoutMS=5000, tlsAllowInvalidCertificates=True)
+        client.admin.command('ping')
+        return client['technobolthub']
+    except Exception as e:
+        st.error(f"Erro de conexão com o Banco de Dados: {e}")
+        return None
 
 db = iniciar_conexao()
 
