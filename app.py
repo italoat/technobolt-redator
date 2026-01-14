@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 from pymongo import MongoClient
 import pandas as pd
+import urllib.parse
 
 # --- 1. CONFIGURAÇÃO DE SEGURANÇA E PROTOCOLO ---
 st.set_page_config(
@@ -22,18 +23,24 @@ st.set_page_config(
 @st.cache_resource
 def iniciar_conexao():
     try:
+        # Busca variáveis do Render ou usa os padrões definidos
         user = os.environ.get("MONGO_USER", "technobolt")
         password_raw = os.environ.get("MONGO_PASS", "tech@132")
         host = os.environ.get("MONGO_HOST", "cluster0.zbjsvk6.mongodb.net")
+        
+        # Faz o encode da senha (evita erro com o @)
         password = urllib.parse.quote_plus(password_raw)
         uri = f"mongodb+srv://{user}:{password}@{host}/?appName=Cluster0"
+        
+        # Configura o client com timeout de 5 segundos
         client = MongoClient(uri, serverSelectionTimeoutMS=5000, tlsAllowInvalidCertificates=True)
-        client.admin.command('ping')
+        client.admin.command('ping') # Valida se a conexão está ativa
         return client['technobolthub']
     except Exception as e:
-        st.error(f"Erro de conexão com o Banco de Dados: {e}")
+        st.error(f"⚠️ Erro de conexão com o MongoDB Atlas: {e}")
         return None
 
+# Inicializa a variável global db
 db = iniciar_conexao()
 
 # --- 3. GESTÃO DE ESTADO (DNA CORPORATIVO) ---
@@ -181,16 +188,24 @@ if not st.session_state.logged_in:
             u = st.text_input("Operador ID", placeholder="ID")
             k = st.text_input("Chave PIN", type="password")
             if st.form_submit_button("CONECTAR"):
-                user_db = db["usuarios"].find_one({"usuario": u, "senha": k})
-                if user_db:
-                    if user_db.get("status") == "ativo":
-                        st.session_state.logged_in = True
-                        st.session_state.user_atual = u
-                        st.session_state.user_plan = user_db.get("plano", "Standard")
-                        st.session_state.is_admin = user_db.get("is_admin", False)
-                        st.rerun()
-                    else: st.warning("Conta aguardando ativação administrativa.")
-                else: st.error("ID ou PIN incorretos.")
+    if db is not None:  # PROTEÇÃO: Só tenta buscar se o banco estiver conectado
+        try:
+            user_db = db["usuarios"].find_one({"usuario": u, "senha": k})
+            if user_db:
+                if user_db.get("status") == "ativo":
+                    st.session_state.logged_in = True
+                    st.session_state.user_atual = u
+                    st.session_state.user_plan = user_db.get("plano", "Standard")
+                    st.session_state.is_admin = user_db.get("is_admin", False)
+                    st.rerun()
+                else:
+                    st.warning("Conta aguardando ativação administrativa.")
+            else:
+                st.error("ID ou PIN incorretos.")
+        except Exception as e:
+            st.error(f"Erro ao consultar banco de dados: {e}")
+    else:
+        st.error("SISTEMA OFFLINE: Não foi possível estabelecer conexão com o servidor de dados.")
     with tab2:
         with st.form("request_access"):
             new_u = st.text_input("ID Desejado (Sem espaços ou @)")
