@@ -286,6 +286,41 @@ elif escolha == "Analisador de Documentos":
                     st.session_state.titulo_resultado = f"Auditoria McKinsey ({mot})"
                     st.session_state.mostrar_resultado = True
                     st.rerun()
+elif escolha == "Analisador de E-mails":
+    st.markdown("<div class='main-card'><h2>Analisador de E-mails</h2></div>", unsafe_allow_html=True)
+    with st.form("form_emails"):
+        lote = st.text_area("Cole aqui os blocos de e-mail para triagem:", height=250)
+        if st.form_submit_button("EXECUTAR TRIAGEM"):
+            if lote.strip():
+                with st.spinner("CCO analisando comunicações..."):
+                    # O motor de IA já chama persistir_interacao internamente
+                    res, mot = call_technobolt_ai(lote, None, "email_intel")
+                    
+                    st.session_state.resultado_ia = res
+                    st.session_state.titulo_resultado = f"Triagem Executiva ({mot})"
+                    st.session_state.mostrar_resultado = True
+                    st.rerun()
+            else:
+                st.warning("⚠️ Forneça o conteúdo dos e-mails para processamento.")
+
+    # Seção de Histórico de Inteligência (Blindada contra erro de conexão)
+    if db is not None:
+        st.markdown("### 📥 Histórico de Triagens Recentes")
+        try:
+            hist = list(db["governanca_logs"].find({
+                "modulo": "email_intel", 
+                "usuario": st.session_state.user_atual
+            }).sort("timestamp", -1).limit(3))
+            
+            if hist:
+                for h in hist:
+                    data_formatada = h['timestamp'].strftime('%d/%m/%Y %H:%M')
+                    with st.expander(f"Triagem realizada em {data_formatada}"):
+                        st.write(h['output'])
+            else:
+                st.info("Nenhuma triagem encontrada no histórico.")
+        except Exception as e:
+            st.error(f"Erro ao carregar histórico: {e}")
 
 elif escolha == "Gerador de Emails":
     st.markdown("<div class='main-card'><h2>Gerador de Emails</h2></div>", unsafe_allow_html=True)
