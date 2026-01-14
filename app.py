@@ -21,7 +21,6 @@ st.set_page_config(
 # --- 2. CONEXÃO MONGODB (RENDER CONFIG) ---
 @st.cache_resource
 def iniciar_conexao():
-def iniciar_conexao():
     try:
         user = os.environ.get("MONGO_USER", "technobolt")
         password_raw = os.environ.get("MONGO_PASS", "tech@132")
