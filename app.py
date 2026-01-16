@@ -394,16 +394,31 @@ if escolha == "Centro de Comando":
 
 elif escolha == "Criar Apresentação":
     st.markdown("<div class='main-card'><h2>Gerador de Slides Executivos</h2></div>", unsafe_allow_html=True)
+    
+    # Inicializa variáveis de estado para o PDF se não existirem
+    if 'pdf_buffer' not in st.session_state:
+        st.session_state.pdf_buffer = None
+    if 'slides_data' not in st.session_state:
+        st.session_state.slides_data = None
+
     with st.form("form_slides"):
         tema_slides = st.text_area("Descreva o conteúdo e objetivo da apresentação:")
-        estilo_visual = st.selectbox("Estilo Visual / Tema:", ["TechnoBolt Dark (Padrão)", "Minimalista Claro", "Corporativo Azul", "High Tech Neon"])
-        if st.form_submit_button("GERAR APRESENTAÇÃO"):
+        estilo_visual = st.selectbox("Estilo Visual / Tema:", 
+                                     ["TechnoBolt Dark (Padrão)", "Minimalista Claro", "Corporativo Azul", "High Tech Neon"])
+        
+        # O botão de submissão permanece DENTRO do form
+        submitted = st.form_submit_button("GERAR APRESENTAÇÃO")
+
+        if submitted:
             if tema_slides.strip():
                 with st.spinner("Desenhando slides e estruturando narrativa..."):
                     prompt = f"Crie uma apresentação sobre: {tema_slides}. O tema visual é: {estilo_visual}. Retorne APENAS o JSON."
                     raw_res, mot = call_technobolt_ai(prompt, None, "slides")
+                    
+                    # Lógica de Parse do JSON
                     json_match = re.search(r'```json\n(.*?)\n```', raw_res, re.DOTALL)
                     dados_slides = []
+                    
                     if json_match:
                         try: dados_slides = json.loads(json_match.group(1))
                         except: pass
@@ -412,19 +427,40 @@ elif escolha == "Criar Apresentação":
                         except: pass
                         
                     if dados_slides:
-                        pdf_buffer = gerar_pdf_apresentacao(dados_slides, estilo_visual)
-                        st.session_state.resultado_ia = "Apresentação gerada com sucesso."
-                        st.session_state.titulo_resultado = f"Slides: {tema_slides[:30]}..."
-                        st.session_state.mostrar_resultado = False 
-                        st.success("Slides Renderizados!")
-                        st.download_button(label="📥 BAIXAR PDF (PAISAGEM)", data=pdf_buffer, file_name="apresentacao_technobolt.pdf", mime="application/pdf")
-                        with st.expander("Visualizar Estrutura Gerada"):
-                            for s in dados_slides:
-                                st.markdown(f"**{s.get('titulo')}**")
-                                for p in s.get('pontos', []):
-                                    st.markdown(f"- {p}")
-                    else: st.error("Erro ao estruturar os dados da apresentação.")
-            else: st.warning("Descreva o tema da apresentação.")
+                        # Gera o PDF e salva no Session State (Memória)
+                        st.session_state.pdf_buffer = gerar_pdf_apresentacao(dados_slides, estilo_visual)
+                        st.session_state.slides_data = dados_slides
+                        st.session_state.titulo_slides = tema_slides
+                        st.success("Slides Renderizados! O botão de download aparecerá abaixo.")
+                    else:
+                        st.error("Erro ao estruturar os dados da apresentação. A IA não retornou um JSON válido.")
+            else:
+                st.warning("Descreva o tema da apresentação.")
+
+    # --- FORA DO FORMULÁRIO (Indentação voltou para a esquerda) ---
+    # Aqui verificamos se o PDF foi gerado e mostramos o botão
+    if st.session_state.pdf_buffer is not None:
+        st.markdown("---")
+        st.markdown(f"### 📂 Download: {st.session_state.titulo_slides[:30]}...")
+        
+        col_dl, col_prev = st.columns([1, 2])
+        
+        with col_dl:
+            st.download_button(
+                label="📥 BAIXAR PDF (PAISAGEM)",
+                data=st.session_state.pdf_buffer,
+                file_name="apresentacao_technobolt.pdf",
+                mime="application/pdf"
+            )
+        
+        with col_prev:
+            with st.expander("👁️ Visualizar Estrutura Gerada"):
+                if st.session_state.slides_data:
+                    for s in st.session_state.slides_data:
+                        st.markdown(f"**{s.get('titulo', 'Slide')}**")
+                        for p in s.get('pontos', []):
+                            st.markdown(f"- {p}")
+
 
 elif escolha == "Analisador de Documentos":
     st.markdown("<div class='main-card'><h2>Analisador de Documentos</h2></div>", unsafe_allow_html=True)
