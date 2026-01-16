@@ -395,18 +395,15 @@ if escolha == "Centro de Comando":
 elif escolha == "Criar Apresentação":
     st.markdown("<div class='main-card'><h2>Gerador de Slides Executivos</h2></div>", unsafe_allow_html=True)
     
-    # Inicializa variáveis de estado para o PDF se não existirem
-    if 'pdf_buffer' not in st.session_state:
-        st.session_state.pdf_buffer = None
-    if 'slides_data' not in st.session_state:
-        st.session_state.slides_data = None
+    # Inicializa variáveis de estado
+    if 'pdf_buffer' not in st.session_state: st.session_state.pdf_buffer = None
+    if 'slides_data' not in st.session_state: st.session_state.slides_data = None
+    if 'titulo_slides' not in st.session_state: st.session_state.titulo_slides = "Apresentação"
 
     with st.form("form_slides"):
         tema_slides = st.text_area("Descreva o conteúdo e objetivo da apresentação:")
-        estilo_visual = st.selectbox("Estilo Visual / Tema:", 
-                                     ["TechnoBolt Dark (Padrão)", "Minimalista Claro", "Corporativo Azul", "High Tech Neon"])
+        estilo_visual = st.selectbox("Estilo Visual / Tema:", ["TechnoBolt Dark (Padrão)", "Minimalista Claro", "Corporativo Azul", "High Tech Neon"])
         
-        # O botão de submissão permanece DENTRO do form
         submitted = st.form_submit_button("GERAR APRESENTAÇÃO")
 
         if submitted:
@@ -415,7 +412,7 @@ elif escolha == "Criar Apresentação":
                     prompt = f"Crie uma apresentação sobre: {tema_slides}. O tema visual é: {estilo_visual}. Retorne APENAS o JSON."
                     raw_res, mot = call_technobolt_ai(prompt, None, "slides")
                     
-                    # Lógica de Parse do JSON
+                    # Parse do JSON
                     json_match = re.search(r'```json\n(.*?)\n```', raw_res, re.DOTALL)
                     dados_slides = []
                     
@@ -427,22 +424,19 @@ elif escolha == "Criar Apresentação":
                         except: pass
                         
                     if dados_slides:
-                        # Gera o PDF e salva no Session State (Memória)
+                        # Salva no Session State ao invés de tentar baixar no Form
                         st.session_state.pdf_buffer = gerar_pdf_apresentacao(dados_slides, estilo_visual)
                         st.session_state.slides_data = dados_slides
                         st.session_state.titulo_slides = tema_slides
-                        st.success("Slides Renderizados! O botão de download aparecerá abaixo.")
+                        st.success("Slides Renderizados! Use o botão abaixo para baixar.")
                     else:
-                        st.error("Erro ao estruturar os dados da apresentação. A IA não retornou um JSON válido.")
+                        st.error("Erro ao estruturar os dados da apresentação. Tente novamente.")
             else:
                 st.warning("Descreva o tema da apresentação.")
 
-    # --- FORA DO FORMULÁRIO (Indentação voltou para a esquerda) ---
-    # Aqui verificamos se o PDF foi gerado e mostramos o botão
+    # BOTÃO DE DOWNLOAD FORA DO FORMULÁRIO (CORREÇÃO DO ERRO)
     if st.session_state.pdf_buffer is not None:
         st.markdown("---")
-        st.markdown(f"### 📂 Download: {st.session_state.titulo_slides[:30]}...")
-        
         col_dl, col_prev = st.columns([1, 2])
         
         with col_dl:
@@ -460,7 +454,6 @@ elif escolha == "Criar Apresentação":
                         st.markdown(f"**{s.get('titulo', 'Slide')}**")
                         for p in s.get('pontos', []):
                             st.markdown(f"- {p}")
-
 
 elif escolha == "Analisador de Documentos":
     st.markdown("<div class='main-card'><h2>Analisador de Documentos</h2></div>", unsafe_allow_html=True)
