@@ -1,6 +1,7 @@
 streamlit
 google-generativeai
 python-docx
-sendgrid
 pymongo
+pandas
 reportlab
+dnspython
