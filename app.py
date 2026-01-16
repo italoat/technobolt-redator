@@ -11,6 +11,12 @@ from pymongo import MongoClient
 import pandas as pd
 import urllib.parse
 
+# Importações para PDF (Novo Módulo)
+from reportlab.lib.pagesizes import landscape, A4
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.utils import simpleSplit
+
 # --- 1. CONFIGURAÇÃO DE SEGURANÇA E PROTOCOLO ---
 st.set_page_config(
     page_title="TechnoBolt IA - Elite Hub de Governança",
@@ -23,24 +29,20 @@ st.set_page_config(
 @st.cache_resource
 def iniciar_conexao():
     try:
-        # Busca variáveis do Render ou usa os padrões definidos
         user = os.environ.get("MONGO_USER", "technobolt")
         password_raw = os.environ.get("MONGO_PASS", "tech@132")
         host = os.environ.get("MONGO_HOST", "cluster0.zbjsvk6.mongodb.net")
         
-        # Faz o encode da senha (evita erro com o @)
         password = urllib.parse.quote_plus(password_raw)
         uri = f"mongodb+srv://{user}:{password}@{host}/?appName=Cluster0"
         
-        # Configura o client com timeout de 5 segundos
         client = MongoClient(uri, serverSelectionTimeoutMS=5000, tlsAllowInvalidCertificates=True)
-        client.admin.command('ping') # Valida se a conexão está ativa
+        client.admin.command('ping') 
         return client['technobolthub']
     except Exception as e:
         st.error(f"⚠️ Erro de conexão com o MongoDB Atlas: {e}")
         return None
 
-# Inicializa a variável global db
 db = iniciar_conexao()
 
 # --- 3. GESTÃO DE ESTADO (DNA CORPORATIVO) ---
@@ -65,7 +67,7 @@ for chave, valor in chaves_sessao.items():
     if chave not in st.session_state:
         st.session_state[chave] = valor
 
-# --- 4. DESIGN SYSTEM (ELITE CORPORATE UI) ---
+# --- 4. DESIGN SYSTEM (ELITE CORPORATE UI - AJUSTADO) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -92,15 +94,22 @@ st.markdown("""
         padding: 25px !important;
     }
 
-    /* INPUTS & SELECTS: Corrigir fundo branco */
+    /* INPUTS & SELECTS: Corrigir fundo branco em todos os estados */
     .stTextInput input, .stTextArea textarea, [data-baseweb="select"] > div, .stSelectbox div {
         background-color: #1a1a1a !important; 
         border: 1px solid #444 !important;
         border-radius: 8px !important; 
         color: #ffffff !important;
     }
+    
+    /* Foco nos inputs (evitar branco ao clicar) */
+    .stTextInput input:focus, .stTextArea textarea:focus {
+        background-color: #1a1a1a !important;
+        border-color: #666 !important;
+        color: #ffffff !important;
+    }
 
-    /* BUTTONS: Corrigir botão ficando branco fora do hover */
+    /* BUTTONS: Corrigir botão ficando branco fora do hover e no active */
     .stButton > button {
         width: 100% !important; 
         border-radius: 8px !important; 
@@ -116,6 +125,12 @@ st.markdown("""
         background-color: #333333 !important; 
         border-color: #666 !important;
         color: #ffffff !important;
+    }
+    
+    .stButton > button:active, .stButton > button:focus {
+        background-color: #444444 !important;
+        color: #ffffff !important;
+        border-color: #888 !important;
     }
 
     /* Cards de Resultado */
@@ -144,7 +159,7 @@ def limpar_formatacao(texto):
     return texto.strip()
 
 def persistir_interacao(modulo, input_data, output_text, kpis_json):
-    if db is not None:  # PROTEÇÃO ESSENCIAL
+    if db is not None:
         try:
             log = {
                 "usuario": st.session_state.user_atual,
@@ -162,6 +177,62 @@ def validar_usuario(username):
     if not username: return False
     return not bool(re.search(r'[\s@]', username))
 
+def gerar_pdf_apresentacao(dados_slides, tema_visual):
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=landscape(A4))
+    width, height = landscape(A4)
+    
+    # Definição de Cores baseada no Tema
+    if "claro" in tema_visual.lower() or "light" in tema_visual.lower() or "branco" in tema_visual.lower():
+        bg_color = colors.white
+        text_color = colors.black
+        accent_color = colors.darkblue
+    else: # Padrão Dark (TechnoBolt)
+        bg_color = colors.black
+        text_color = colors.white
+        accent_color = colors.grey
+        
+    for slide in dados_slides:
+        # Fundo
+        c.setFillColor(bg_color)
+        c.rect(0, 0, width, height, fill=1)
+        
+        # Header / Título
+        c.setFillColor(accent_color)
+        c.rect(0, height - 100, width, 100, fill=1)
+        
+        c.setFillColor(colors.white if bg_color == colors.black else colors.white)
+        c.setFont("Helvetica-Bold", 28)
+        c.drawCentredString(width / 2, height - 65, slide.get('titulo', 'Sem Título'))
+        
+        # Conteúdo (Bullets)
+        c.setFillColor(text_color)
+        c.setFont("Helvetica", 18)
+        y_position = height - 150
+        
+        pontos = slide.get('pontos', [])
+        if isinstance(pontos, str): pontos = [pontos]
+        
+        for ponto in pontos:
+            # Quebra de linha simples
+            wrapped_text = simpleSplit(f"• {ponto}", "Helvetica", 18, width - 100)
+            for line in wrapped_text:
+                c.drawString(50, y_position, line)
+                y_position -= 25
+                if y_position < 50: break # Evita sair da página
+            y_position -= 10 # Espaço extra entre itens
+            
+        # Rodapé
+        c.setFillColor(colors.grey)
+        c.setFont("Helvetica", 10)
+        c.drawString(width - 150, 20, "TechnoBolt Elite Slides")
+        
+        c.showPage()
+        
+    c.save()
+    buffer.seek(0)
+    return buffer
+
 # --- 6. MOTOR DE IA ---
 MODEL_FAILOVER_LIST = ["models/gemini-3-flash-preview", "models/gemini-2.5-flash", "models/gemini-2.0-flash", "models/gemini-flash-latest"]
 
@@ -172,22 +243,31 @@ def call_technobolt_ai(prompt, attachments=None, system_context="default"):
     p = st.session_state.perfil_cliente
     dna_context = f"DNA: {p['nome_empresa']}. Tom: {p['tom_voz']}.\n"
     
+    # Instrução padrão para módulos analíticos (mantém JSON de KPIs)
     kpi_instruction = (
         "\nOBRIGATÓRIO: No final da resposta, adicione EXATAMENTE um bloco JSON estruturado entre ```json e ``` "
         "com as chaves: 'faturamento', 'margem', 'riscos_count', 'prazos_alerta'."
     )
-
-    contexts = {
-        "mckinsey": "Persona: Sócio McKinsey. Framework: 7S e MECE.",
-        "email_intel": "Persona: CCO. Triagem diplomática.",
-        "briefing": "Persona: Diretor de Inteligência.",
-        "ata": "Persona: Secretário de Governança B3.",
-        "churn": "Persona: Especialista em Retenção.",
-        "master": "Persona: COO. Consolidação semanal.",
-        "default": "Consultoria Sênior TechnoBolt."
-    }
     
-    sys_instr = dna_context + contexts.get(system_context, contexts["default"]) + kpi_instruction
+    # Instrução especial para Slides
+    if system_context == "slides":
+        sys_instr = (
+            "Você é um Designer de Apresentações Executivas. "
+            "Gere o conteúdo em formato JSON ESTRUTURADO. "
+            "O formato deve ser uma lista de objetos: [{'titulo': '...', 'pontos': ['...', '...']}]. "
+            "Crie entre 4 a 6 slides. Seja direto e use tópicos curtos."
+        )
+    else:
+        contexts = {
+            "mckinsey": "Persona: Sócio McKinsey. Framework: 7S e MECE.",
+            "email_intel": "Persona: CCO. Triagem diplomática.",
+            "briefing": "Persona: Diretor de Inteligência.",
+            "ata": "Persona: Secretário de Governança B3.",
+            "churn": "Persona: Especialista em Retenção.",
+            "master": "Persona: COO. Consolidação semanal.",
+            "default": "Consultoria Sênior TechnoBolt."
+        }
+        sys_instr = dna_context + contexts.get(system_context, contexts["default"]) + kpi_instruction
     
     for key in chaves:
         try:
@@ -198,6 +278,11 @@ def call_technobolt_ai(prompt, attachments=None, system_context="default"):
                     payload = [prompt] + attachments if attachments else prompt
                     response = model.generate_content(payload)
                     full_text = response.text
+                    
+                    if system_context == "slides":
+                        return full_text, f"{model_name.split('/')[-1]}"
+                    
+                    # Lógica padrão para outros módulos
                     kpis = {"faturamento": 0, "margem": 0, "riscos_count": 0, "prazos_alerta": 0}
                     json_match = re.search(r'```json\n(.*?)\n```', full_text, re.DOTALL)
                     if json_match:
@@ -220,7 +305,7 @@ if not st.session_state.logged_in:
             k = st.text_input("Chave PIN", type="password")
             
             if st.form_submit_button("CONECTAR"):
-                if db is not None:  # ESTA LINHA AGORA ESTÁ IDENTADA CORRETAMENTE
+                if db is not None:
                     try:
                         user_db = db["usuarios"].find_one({"usuario": u, "senha": k})
                         if user_db:
@@ -246,7 +331,7 @@ if not st.session_state.logged_in:
             plan_req = st.selectbox("Plano Desejado", ["Standard", "Advanced", "Executive"])
             
             if st.form_submit_button("SOLICITAR"):
-                if db is not None: # Adicionada proteção aqui também
+                if db is not None:
                     if validar_usuario(new_u):
                         if not db["usuarios"].find_one({"usuario": new_u}):
                             db["usuarios"].insert_one({
@@ -268,7 +353,7 @@ with st.sidebar:
     st.markdown(f"<p style='text-align:center; font-size:10px;'>MODO: {st.session_state.user_plan.upper()}</p>", unsafe_allow_html=True)
     st.markdown("---")
     
-    opcoes = ["Centro de Comando", "Analisador de Documentos", "Analisador de E-mails", "Gerador de Emails", "Briefing Estratégico", "Gerador de Atas", "Mercado & Churn", "Relatório Semanal"]
+    opcoes = ["Centro de Comando", "Analisador de Documentos", "Analisador de E-mails", "Gerador de Emails", "Briefing Estratégico", "Gerador de Atas", "Mercado & Churn", "Relatório Semanal", "Criar Apresentação"]
     
     # AJUSTE: Permite acesso à gestão para ID "admin" ou qualquer um com flag is_admin
     if st.session_state.user_atual == "admin" or st.session_state.is_admin:
@@ -280,7 +365,7 @@ with st.sidebar:
         st.session_state.logged_in = False
         st.rerun()
 
-restritos_standard = ["Analisador de Documentos", "Analisador de E-mails", "Mercado & Churn"]
+restritos_standard = ["Analisador de Documentos", "Analisador de E-mails", "Mercado & Churn", "Criar Apresentação"]
 if st.session_state.user_plan == "Standard" and escolha in restritos_standard:
     st.markdown(f"<div class='main-card'><h2>🚀 Upgrade Necessário</h2><p>O módulo <b>{escolha}</b> está disponível apenas para parceiros Advanced e Executive.</p></div>", unsafe_allow_html=True)
     st.stop()
@@ -290,7 +375,6 @@ if st.session_state.user_plan == "Standard" and escolha in restritos_standard:
 if escolha == "Centro de Comando":
     st.markdown("<h1 class='hero-title'>Dashboard Cognitivo</h1>", unsafe_allow_html=True)
     
-    # Proteção para o dashboard
     if db is not None:
         logs = list(db["governanca_logs"].find({"usuario": st.session_state.user_atual}).sort("timestamp", -1).limit(10))
         if logs:
@@ -306,6 +390,60 @@ if escolha == "Centro de Comando":
             st.info("Execute análises para popular o dashboard estratégico.")
     else:
         st.warning("Métricas indisponíveis em modo offline.")
+
+elif escolha == "Criar Apresentação":
+    st.markdown("<div class='main-card'><h2>Gerador de Slides Executivos</h2></div>", unsafe_allow_html=True)
+    
+    with st.form("form_slides"):
+        tema_slides = st.text_area("Descreva o conteúdo e objetivo da apresentação:")
+        estilo_visual = st.selectbox("Estilo Visual / Tema:", 
+                                     ["TechnoBolt Dark (Padrão)", "Minimalista Claro", "Corporativo Azul", "High Tech Neon"])
+        
+        if st.form_submit_button("GERAR APRESENTAÇÃO"):
+            if tema_slides.strip():
+                with st.spinner("Desenhando slides e estruturando narrativa..."):
+                    prompt = f"Crie uma apresentação sobre: {tema_slides}. O tema visual é: {estilo_visual}. Retorne APENAS o JSON."
+                    raw_res, mot = call_technobolt_ai(prompt, None, "slides")
+                    
+                    # Tentativa de parse do JSON
+                    json_match = re.search(r'```json\n(.*?)\n```', raw_res, re.DOTALL)
+                    dados_slides = []
+                    
+                    if json_match:
+                        try: 
+                            dados_slides = json.loads(json_match.group(1))
+                        except: pass
+                    else:
+                        # Fallback simples se o JSON falhar
+                        try: dados_slides = json.loads(raw_res)
+                        except: pass
+                        
+                    if dados_slides:
+                        # Gerar PDF
+                        pdf_buffer = gerar_pdf_apresentacao(dados_slides, estilo_visual)
+                        
+                        st.session_state.resultado_ia = "Apresentação gerada com sucesso. Clique abaixo para baixar."
+                        st.session_state.titulo_resultado = f"Slides: {tema_slides[:30]}..."
+                        st.session_state.mostrar_resultado = False # Não mostra texto, mostra botão direto
+                        
+                        st.success("Slides Renderizados!")
+                        st.download_button(
+                            label="📥 BAIXAR PDF (PAISAGEM)",
+                            data=pdf_buffer,
+                            file_name="apresentacao_technobolt.pdf",
+                            mime="application/pdf"
+                        )
+                        
+                        # Preview rápido dos tópicos
+                        with st.expander("Visualizar Estrutura Gerada"):
+                            for s in dados_slides:
+                                st.markdown(f"**{s.get('titulo')}**")
+                                for p in s.get('pontos', []):
+                                    st.markdown(f"- {p}")
+                    else:
+                        st.error("Erro ao estruturar os dados da apresentação. Tente novamente.")
+            else:
+                st.warning("Descreva o tema da apresentação.")
 
 elif escolha == "Analisador de Documentos":
     st.markdown("<div class='main-card'><h2>Analisador de Documentos</h2></div>", unsafe_allow_html=True)
